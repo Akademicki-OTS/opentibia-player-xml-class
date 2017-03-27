@@ -1,7 +1,7 @@
 ﻿<?php
 /*
 Open Tibia XML player class
-Version: 0.1.3
+Version: 0.1.4
 Author: Pawel 'Pavlus' Janisio
 License: MIT
 Github: https://github.com/PJanisio/opentibia-player-xml-class
@@ -23,6 +23,7 @@ public $xmlAccount = NULL;
 public $account = 0;
 public $structurePlayer = '';
 public $structureAccount = '';
+public $spawn = array();
 
 /*
 Checks paths and define directories
@@ -201,15 +202,49 @@ return intval($this->xmlPlayer['maglevel']);
 
 /*
 Get lastlogin
+Available formats at: http://php.net/manual/en/function.date.php
+F.e: Y-m-d H:i:s
 */
 public function getLastLogin($format = NULL) {
 
 $time = intval($this->xmlPlayer['lastlogin']);
 
 if($format != NULL)
-return date('Y-m-d H:i:s', $time);
+return date($format, $time);
 	else
 		return $time;
+
+}
+
+/*
+Get promoted status
+*/
+public function getPromotion() {
+
+return intval($this->xmlPlayer['promoted']);
+
+}
+
+
+/*
+Get ban status
+*/
+public function getBanStatus() {
+
+return intval($this->xmlPlayer['banned']);
+}
+
+
+/*
+Get spawn position as an array
+*/
+public function getSpawnCoordinates() {
+
+$this->spawn['x'] = intval($this->xmlPlayer->spawn['x']);
+$this->spawn['y'] = intval($this->xmlPlayer->spawn['y']);
+$this->spawn['z'] = intval($this->xmlPlayer->spawn['z']);
+
+return $this->spawn;
 
 }
 
