@@ -24,6 +24,8 @@ public $account = 0;
 public $structurePlayer = '';
 public $structureAccount = '';
 public $spawn = array();
+public $temple = array();
+public $skull = '';
 
 /*
 Checks paths and define directories
@@ -98,6 +100,30 @@ Show xml structure for account file
 */
 public function showStructureAccount() {
 echo '<pre>', var_dump($this->xmlAccount), '</pre>';
+
+}
+
+
+/*
+Show last modyfied player files (by save or by class action)
+*/
+public function showLastModifiedPlayers($minutes) {
+
+if(!isset($minutes))
+$minutes = 5;
+
+$files = scandir($this->playersDir);
+foreach($files as $file) {
+  $stat = stat($this->playersDir.$file);
+	
+	$lastmod = $stat['mtime'];
+		$now = time();
+	
+	if($now - $lastmod < $minutes*60) 
+	//change to array
+		echo $file.' '.date("Y-m-d H:i:s", $lastmod).'<br>';
+		}
+	
 
 }
 
@@ -245,6 +271,47 @@ $this->spawn['y'] = intval($this->xmlPlayer->spawn['y']);
 $this->spawn['z'] = intval($this->xmlPlayer->spawn['z']);
 
 return $this->spawn;
+
+}
+
+/*
+Get temple position as an array
+*/
+public function getTempleCoordinates() {
+
+$this->temple['x'] = intval($this->xmlPlayer->temple['x']);
+$this->temple['y'] = intval($this->xmlPlayer->temple['y']);
+$this->temple['z'] = intval($this->xmlPlayer->temple['z']);
+
+return $this->temple;
+
+}
+
+/*
+Get skull type
+	SKULL_NONE = 0,
+	SKULL_YELLOW = 1,
+	SKULL_WHITE = 3,
+	SKULL_RED = 4
+*/
+public function getSkull() {
+
+$this->skull = $this->xmlPlayer->skull['type'];
+
+switch ($this->skull) {
+	case 1:
+		return $this->skull = 'YELLOW_SKULL';
+		break;
+	case 3:
+		return $this->skull = 'WHITE_SKULL';
+		break;
+	case 4:
+		return $this->skull = 'RED_SKULL';
+		break;
+	default:
+		return $this->skull = 'NO_SKULL';
+		break;
+}
 
 }
 
