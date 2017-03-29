@@ -26,6 +26,9 @@ public $structureAccount = '';
 public $spawn = array();
 public $temple = array();
 public $skull = '';
+public $lastModified = array();
+public $health = array();
+public $mana = array();
 
 /*
 Checks paths and define directories
@@ -71,6 +74,8 @@ Opens xml stream for player and account file
 public function prepare($playerName) {
 //function to open xml stream, not to open it every time for one player and account
 
+		$playerName = trim(stripslashes($playerName));
+		
 		$this->xmlPlayer = @simplexml_load_file($this->playersDir.$playerName.'.xml');		
 			
 			if($this->xmlPlayer === FALSE) //returns not boolean false what the heck
@@ -107,10 +112,13 @@ echo '<pre>', var_dump($this->xmlAccount), '</pre>';
 /*
 Show last modyfied player files (by save or by class action)
 */
-public function showLastModifiedPlayers($minutes) {
+public function showLastModifiedPlayers($minutes, $dateFormat = NULL) {
 
 if(!isset($minutes))
 $minutes = 5;
+
+if(!isset($dateFormat))
+$dateFormat = 'Y-m-d H:i:s';
 
 $files = scandir($this->playersDir);
 foreach($files as $file) {
@@ -120,10 +128,10 @@ foreach($files as $file) {
 		$now = time();
 	
 	if($now - $lastmod < $minutes*60) 
-	//change to array
-		echo $file.' '.date("Y-m-d H:i:s", $lastmod).'<br>';
+	$this->lastModified[$file] = date($dateFormat, $lastmod);
 		}
-	
+		
+		return $this->lastModified;
 
 }
 
@@ -311,7 +319,60 @@ switch ($this->skull) {
 	default:
 		return $this->skull = 'NO_SKULL';
 		break;
+					}
+
 }
+
+
+/*
+Get health
+now
+max
+*/
+public function getHealth() {
+
+$this->health['now'] = intval($this->xmlPlayer->health['now']);
+$this->health['max'] = intval($this->xmlPlayer->health['max']);
+
+return $this->health;
+
+}
+
+
+/*
+Get food level
+food maximum level = 1200000 (?)
+food > 1000 - gaining health and mana
+*/
+public function getFoodLevel() {
+
+$this->food = intval($this->xmlPlayer->health['food'] );
+
+return $this->food;
+
+}
+
+
+/*
+Get mana information
+*/
+public function getMana() {
+
+$this->mana['now'] = intval($this->xmlPlayer->mana['now']);
+$this->mana['max'] = intval($this->xmlPlayer->mana['max']);
+$this->mana['spent'] = intval($this->xmlPlayer->mana['spent']);
+
+return $this->mana;
+
+}
+
+
+/*
+Magic level percentage
+*/
+public function getMagicLevelPercent() {
+
+//use mana spent and formula
 
 }
 
