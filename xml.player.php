@@ -1,7 +1,7 @@
 ﻿<?php
 /*
 Open Tibia XML player class
-Version: 0.1.4
+Version: 0.1.7
 Author: Pawel 'Pavlus' Janisio
 License: MIT
 Github: https://github.com/PJanisio/opentibia-player-xml-class
@@ -18,8 +18,10 @@ public $errorTxt = ''; //placeholder for error text //def: ''
 public $playerName = '';
 public $playersDir = '';
 public $accountsDir = '';
-public $xmlPlayer = NULL;
-public $xmlAccount = NULL;
+public $xmlPlayer = NULL; //handler for player
+public $xmlAccount = NULL; //handler for account
+public $xmlPlayerFilePath = ''; //exact path for PREPARED player
+public $xmlAccountFilePath = ''; //exact path for PREPARED account
 public $account = 0;
 public $structurePlayer = '';
 public $structureAccount = '';
@@ -28,7 +30,9 @@ public $temple = array();
 public $skull = '';
 public $lastModified = array();
 public $health = array();
+public $food = 0;
 public $mana = array();
+public $lastElement = ''; //double check if will be needed
 
 /*
 Checks paths and define directories
@@ -75,14 +79,15 @@ public function prepare($playerName) {
 //function to open xml stream, not to open it every time for one player and account
 
 		$playerName = trim(stripslashes($playerName));
+			$this->xmlPlayerFilePath = $this->playersDir.$playerName.'.xml';
 		
-		$this->xmlPlayer = @simplexml_load_file($this->playersDir.$playerName.'.xml');		
+		$this->xmlPlayer = @simplexml_load_file($this->xmlPlayerFilePath);		
 			
 			if($this->xmlPlayer === FALSE) //returns not boolean false what the heck
 				$this->throwError('Player do not exists!', 1);
 				else {
-				
-				$this->xmlAccount = @simplexml_load_file($this->accountsDir.$this->getAccount().'.xml');
+				$this->xmlAccountFilePath = $this->accountsDir.$this->getAccount().'.xml';
+				$this->xmlAccount = @simplexml_load_file($this->xmlAccountFilePath);
 				
 			if ($this->xmlAccount === FALSE) 
 				$this->throwError('Account file for player do not exists!', 1);
@@ -91,6 +96,7 @@ public function prepare($playerName) {
 					if($this->xmlAccount AND $this->xmlPlayer)
 						return TRUE;
 }
+
 
 /*
 Show xml structure for player file
@@ -366,15 +372,44 @@ return $this->mana;
 
 }
 
+/*
+Get required mana level
+cpp source -> unsigned int Player::getReqMana(int maglevel, playervoc_t voc)
+*/
+public function getRequiredMana($mlevel = NULL) {
+
+//use mana spent and formula
+$vocationMultiplayer = array(1, 1.1, 1.1, 1.4, 3);
+
+if(!isset($mlevel))
+	$mlevel = $this->getMagicLevel();
+
+$this->reqMana = intval(( 400 * pow($vocationMultiplayer[$this->getVocation()], $mlevel -1)));
+
+if ($this->reqMana % 20 < 10) //CIP must have been bored when they invented this odd rounding
+    $this->reqMana = $this->reqMana - ($this->reqMana % 20);
+  else
+    $this->reqMana = $this->reqMana - ($this->reqMana % 20) + 20;
+
+return $this->reqMana;
+
+}
 
 /*
-Magic level percentage
+Get percentage magic level
+cpp source -> void Player::sendStats()
 */
 public function getMagicLevelPercent() {
 
-//use mana spent and formula
+$this->getMana();
+$this->magicLevelPercent = intval(100*($this->mana['spent']/(1.* $this->getRequiredMana($this->getMagicLevel() + 1) )));
+
+return $this->magicLevelPercent;
 
 }
+
+
+
 
 
 }
