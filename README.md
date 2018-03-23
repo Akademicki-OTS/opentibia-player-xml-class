@@ -29,4 +29,5 @@ getFoodLevel
 getMana
 getRequiredMana
 getMagicLevelPercent
+getStorageValues
 ```

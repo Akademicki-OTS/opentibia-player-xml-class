@@ -1,7 +1,7 @@
 ﻿<?php
 /*
 Open Tibia XML player class
-Version: 0.1.7
+Version: 0.1.8
 Author: Pawel 'Pavlus' Janisio
 License: MIT
 Github: https://github.com/PJanisio/opentibia-player-xml-class
@@ -33,6 +33,7 @@ public $health = array();
 public $food = 0;
 public $mana = array();
 public $lastElement = ''; //double check if will be needed
+public $storage = array();
 
 /*
 Checks paths and define directories
@@ -405,6 +406,27 @@ $this->getMana();
 $this->magicLevelPercent = intval(100*($this->mana['spent']/(1.* $this->getRequiredMana($this->getMagicLevel() + 1) )));
 
 return $this->magicLevelPercent;
+
+}
+
+
+/*
+Get storage values from scripts
+*/
+public function getStorageValues() {
+
+foreach ($this->xmlPlayer->storage->data as $item) {
+	
+	//var_dump($item);
+	$key = (string)$item['key'];
+	$value = (string)$item['value'];
+
+	//var_dump($value);
+	
+	$this->storage[$key] = $value;
+}
+
+return $this->storage;
 
 }
 
