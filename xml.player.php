@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /*
 Open Tibia XML player class
 Version: 0.1.8
@@ -34,6 +34,7 @@ public $food = 0;
 public $mana = array();
 public $lastElement = ''; //double check if will be needed
 public $storage = array();
+public $ban = array(); //ban status,start,end,comment
 
 /*
 Checks paths and define directories
@@ -271,8 +272,16 @@ return intval($this->xmlPlayer['promoted']);
 Get ban status
 */
 public function getBanStatus() {
+    
+$this->ban['status'] = intval($this->xmlPlayer['banned']); //0;1
+$this->ban['start'] = intval($this->xmlPlayer['banstart']); //timestamp
+$this->ban['end'] = intval($this->xmlPlayer['banend']); //timestamp
+$this->ban['comment'] = (string)$this->xmlPlayer['comment']; 
+$this->ban['reason'] = (string)$this->xmlPlayer['reason']; 
+$this->ban['deleted'] = intval($this->xmlPlayer['deleted']); //0;1
+$this->ban['finalwarning'] = intval($this->xmlPlayer['finalwarning']); //0;1
 
-return intval($this->xmlPlayer['banned']);
+return $this->ban;
 }
 
 
