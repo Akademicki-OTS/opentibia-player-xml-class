@@ -1,3 +1,4 @@
+on: push
 steps:
 - name: player-xml-class
   uses: shivammathur/setup-php@v2
