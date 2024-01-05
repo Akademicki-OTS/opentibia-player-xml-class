@@ -1,0 +1,9 @@
+steps:
+- name: player-xml-class
+  uses: shivammathur/setup-php@v2
+  with:
+    php-version: '8.3'
+    extensions: mbstring, intl
+    ini-values: post_max_size= 16M, max_execution_time=60
+    coverage: xdebug
+    tools: php-cs-fixer, phpunit
