@@ -1,7 +1,7 @@
 <?php
 /*
 Open Tibia XML player class
-Version: 0.1.8
+Version: 0.1.9
 Author: Pawel 'Pavlus' Janisio
 License: MIT
 Github: https://github.com/PJanisio/opentibia-player-xml-class
@@ -16,6 +16,7 @@ class xmlPlayer {
 public $showError = 1; //shows backtrace of error message //def: 1
 public $errorTxt = ''; //placeholder for error text //def: ''
 public $playerName = '';
+public $characters = array(); //names of other players on the same account
 public $playersDir = '';
 public $accountsDir = '';
 public $xmlPlayer = NULL; //handler for player
@@ -28,6 +29,7 @@ public $structureAccount = '';
 public $spawn = array();
 public $temple = array();
 public $skull = '';
+public $frags = array();
 public $lastModified = array();
 public $health = array();
 public $food = 0;
@@ -35,6 +37,7 @@ public $mana = array();
 public $lastElement = ''; //double check if will be needed
 public $storage = array();
 public $ban = array(); //ban status,start,end,comment
+public $dead = array();
 
 /*
 Checks paths and define directories
@@ -83,13 +86,13 @@ public function prepare($playerName) {
 		$playerName = trim(stripslashes($playerName));
 			$this->xmlPlayerFilePath = $this->playersDir.$playerName.'.xml';
 		
-		$this->xmlPlayer = @simplexml_load_file($this->xmlPlayerFilePath);		
+		$this->xmlPlayer = simplexml_load_file($this->xmlPlayerFilePath);		
 			
 			if($this->xmlPlayer === FALSE) //returns not boolean false what the heck
 				$this->throwError('Player do not exists!', 1);
 				else {
 				$this->xmlAccountFilePath = $this->accountsDir.$this->getAccount().'.xml';
-				$this->xmlAccount = @simplexml_load_file($this->xmlAccountFilePath);
+				$this->xmlAccount = simplexml_load_file($this->xmlAccountFilePath);
 				
 			if ($this->xmlAccount === FALSE) 
 				$this->throwError('Account file for player do not exists!', 1);
@@ -97,6 +100,8 @@ public function prepare($playerName) {
 					}
 					if($this->xmlAccount AND $this->xmlPlayer)
 						return TRUE;
+						
+	//no need to close the file manuall, will be auto-closed after reading content!
 }
 
 
@@ -122,8 +127,6 @@ Show last modyfied player files (by save or by class action)
 */
 public function showLastModifiedPlayers($minutes, $dateFormat = NULL) {
 
-if(!isset($minutes))
-$minutes = 5;
 
 if(!isset($dateFormat))
 $dateFormat = 'Y-m-d H:i:s';
@@ -150,6 +153,31 @@ Get account number/name
 public function getAccount() {
 
 return strval($this->xmlPlayer['account']);
+
+}
+
+
+/*
+Get premium days
+*/
+public function getPremDays() {
+
+return intval($this->xmlAccount['premDays']);
+
+}
+
+/*
+Get other characters on the same account
+*/
+public function getCharacters() {
+
+for($k =0; $k < count($this->xmlAccount->characters->character); $k++) {
+    $character = $this->xmlAccount->characters->character[$k]['name'];
+            array_push($this->characters, $character);
+            
+    }
+    
+       return $this->characters; //array of objects
 
 }
 
@@ -339,6 +367,19 @@ switch ($this->skull) {
 
 }
 
+/*
+Get frags as an array
+*/
+public function getFrags() {
+
+$this->frags['kills'] = intval($this->xmlPlayer->skull['kills']); //int
+$this->frags['ticks'] = $this->xmlPlayer->skull['ticks'];
+$this->frags['absolve'] = $this->xmlPlayer->skull['absolve'];
+
+return $this->frags;
+
+}
+
 
 /*
 Get health
@@ -440,9 +481,21 @@ return $this->storage;
 }
 
 
+public function getDeaths() {
+    
+    
+    foreach ($this->xmlPlayer->deaths->death as $id) {
+            $this->dead[] = $id;
+        }
+
+       return $this->dead; //array of objects
+
+}
 
 
 
+
+//end class
 }
 
 ?>
