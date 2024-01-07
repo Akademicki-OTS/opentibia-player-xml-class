@@ -1,7 +1,7 @@
 <?php
 /*
 Open Tibia XML player class
-Version: 0.1.9
+Version: 0.2.9
 Author: Pawel 'Pavlus' Janisio
 License: MIT
 Github: https://github.com/PJanisio/opentibia-player-xml-class
@@ -81,7 +81,7 @@ public function throwError($errorTxt, $showError) {
 Opens xml stream for player and account file
 */
 public function prepare($playerName) {
-//function to open xml stream, not to open it every time for one player and account
+//function to open xml stream
 
 		$playerName = trim(stripslashes($playerName));
 			$this->xmlPlayerFilePath = $this->playersDir.$playerName.'.xml';
@@ -101,8 +101,12 @@ public function prepare($playerName) {
 					if($this->xmlAccount AND $this->xmlPlayer)
 						return TRUE;
 						
-	//no need to close the file manuall, will be auto-closed after reading content!
+	//no need to close the file manually, will be auto-closed after reading content!
 }
+
+/*
+Get functions
+*/
 
 
 /*
@@ -493,6 +497,30 @@ public function getDeaths() {
 }
 
 
+/*
+Set functions
+*/
+
+
+/*
+Set new password
+*/
+
+public function setPassword($password) {
+    
+        $this->xmlAccount['pass'] = $password;
+        $makeChange = $this->xmlAccount->asXML($this->xmlAccountFilePath);
+        
+        if($makeChange) {
+            
+            return TRUE;
+        }
+            else {
+                return FALSE;
+            }
+            
+
+}
 
 
 //end class

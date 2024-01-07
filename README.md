@@ -9,6 +9,8 @@ showStructurePlayer
 showStructureAccount
 showLastModifiedPlayers
 getAccount
+getPremDays
+getCharacters
 getSex
 getLookdir
 getExp
@@ -24,10 +26,15 @@ getBanStatus
 getSpawnCoordinates
 getTempleCoordinates
 getSkull
+getFrags
 getHealth
 getFoodLevel
 getMana
 getRequiredMana
 getMagicLevelPercent
 getStorageValues
+getDeaths
+
+setPassword
+
 ```
