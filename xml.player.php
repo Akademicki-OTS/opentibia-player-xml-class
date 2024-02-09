@@ -86,13 +86,13 @@ public function prepare($playerName) {
 		$playerName = trim(stripslashes($playerName));
 			$this->xmlPlayerFilePath = $this->playersDir.$playerName.'.xml';
 		
-		$this->xmlPlayer = simplexml_load_file($this->xmlPlayerFilePath, LIBXML_PARSEHUGE);		
+			$this->xmlPlayer = simplexml_load_file($this->xmlPlayerFilePath, 'SimpleXMLElement', LIBXML_PARSEHUGE);		
 			
 			if($this->xmlPlayer === FALSE) //returns not boolean false what the heck
 				$this->throwError('Player do not exists!', 1);
 				else {
 				$this->xmlAccountFilePath = $this->accountsDir.$this->getAccount().'.xml';
-				$this->xmlAccount = simplexml_load_file($this->xmlAccountFilePath, LIBXML_PARSEHUGE);
+				$this->xmlAccount = simplexml_load_file($this->xmlAccountFilePath, 'SimpleXMLElement', LIBXML_PARSEHUGE);
 				
 			if ($this->xmlAccount === FALSE) 
 				$this->throwError('Account file for player do not exists!', 1);
