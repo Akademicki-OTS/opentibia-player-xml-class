@@ -1,7 +1,7 @@
 <?php
 /*
 Open Tibia XML player class
-Version: 0.2.9
+Version: 0.2.10
 Author: Pawel 'Pavlus' Janisio
 License: MIT
 Github: https://github.com/PJanisio/opentibia-player-xml-class
@@ -13,7 +13,10 @@ class xmlPlayer {
 
 //predefined variables
 
+private $dataPath = '';
+private $realPath = '';
 private $showError = 1; //shows backtrace of error message //def: 1
+
 public $errorTxt = ''; //placeholder for error text //def: ''
 public $playerName = '';
 public $characters = array(); //names of other players on the same account
@@ -26,6 +29,8 @@ public $xmlAccountFilePath = ''; //exact path for PREPARED account
 public $account = 0;
 public $structurePlayer = '';
 public $structureAccount = '';
+public $reqMana;
+public $magicLevelPercent;
 public $spawn = array();
 public $temple = array();
 public $skull = '';
@@ -286,7 +291,7 @@ $time = intval($this->xmlPlayer['lastlogin']);
 if($format != NULL)
 return date($format, $time);
 	else
-		return invtal($time);
+		return intval($time);
 
 }
 
@@ -471,12 +476,8 @@ public function getStorageValues() {
 
 foreach ($this->xmlPlayer->storage->data as $item) {
 	
-	//var_dump($item);
 	$key = strval($item['key']);
 	$value = strval($item['value']);
-
-	//var_dump($value);
-	
 	$this->storage[$key] = $value;
 }
 
@@ -519,8 +520,59 @@ public function setPassword($password) {
                 return FALSE;
             }
             
-
 }
+
+
+/*
+Set new password
+*/
+
+public function setPremDays($count) {
+    
+	$this->xmlAccount['premDays'] = $count;
+	$makeChange = $this->xmlAccount->asXML($this->xmlAccountFilePath);
+	
+	if($makeChange) {
+		
+		return TRUE;
+	}
+		else {
+			return FALSE;
+		}
+		
+}
+
+
+/*
+Remove character from account
+*/
+
+//test it
+
+public function removeCharacter($charName) {
+    
+	$charArray = $this->getCharacters();
+	foreach($charArray as $seg) {
+
+		if($seg['name'] == $charName) {
+	
+			$dom = dom_import_simplexml($seg);
+			$dom->parentNode->removeChild($dom);
+		}
+
+	}
+
+	$makeChange = $this->xmlAccount->asXML($this->xmlAccountFilePath);
+	if($makeChange) {
+		
+		return TRUE;
+	}
+		else {
+			return FALSE;
+		}
+
+	}
+
 
 
 //end class
