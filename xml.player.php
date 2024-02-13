@@ -13,7 +13,7 @@ class xmlPlayer {
 
 //predefined variables
 
-public $showError = 1; //shows backtrace of error message //def: 1
+private $showError = 1; //shows backtrace of error message //def: 1
 public $errorTxt = ''; //placeholder for error text //def: ''
 public $playerName = '';
 public $characters = array(); //names of other players on the same account
@@ -71,7 +71,7 @@ public function throwError($errorTxt, $showError) {
 			
 			
 			if($showError == 1) {
-			echo '<b>'.$errorTxt.'</b><br>';
+			echo $errorTxt;
 			throw new Exception($this->errorTxt);			
 		}
 
@@ -286,7 +286,7 @@ $time = intval($this->xmlPlayer['lastlogin']);
 if($format != NULL)
 return date($format, $time);
 	else
-		return $time;
+		return invtal($time);
 
 }
 
@@ -308,8 +308,8 @@ public function getBanStatus() {
 $this->ban['status'] = intval($this->xmlPlayer['banned']); //0;1
 $this->ban['start'] = intval($this->xmlPlayer['banstart']); //timestamp
 $this->ban['end'] = intval($this->xmlPlayer['banend']); //timestamp
-$this->ban['comment'] = (string)$this->xmlPlayer['comment']; 
-$this->ban['reason'] = (string)$this->xmlPlayer['reason']; 
+$this->ban['comment'] = strval($this->xmlPlayer['comment']); 
+$this->ban['reason'] = strval($this->xmlPlayer['reason']); 
 $this->ban['deleted'] = intval($this->xmlPlayer['deleted']); //0;1
 $this->ban['finalwarning'] = intval($this->xmlPlayer['finalwarning']); //0;1
 
@@ -377,10 +377,10 @@ Get frags as an array
 public function getFrags() {
 
 $this->frags['kills'] = intval($this->xmlPlayer->skull['kills']); //int
-$this->frags['ticks'] = $this->xmlPlayer->skull['ticks'];
-$this->frags['absolve'] = $this->xmlPlayer->skull['absolve'];
+$this->frags['ticks'] = intval($this->xmlPlayer->skull['ticks']);
+$this->frags['absolve'] = intval($this->xmlPlayer->skull['absolve']);
 
-return $this->frags;
+return $this->frags; //array
 
 }
 
@@ -395,7 +395,7 @@ public function getHealth() {
 $this->health['now'] = intval($this->xmlPlayer->health['now']);
 $this->health['max'] = intval($this->xmlPlayer->health['max']);
 
-return $this->health;
+return $this->health; //array
 
 }
 
@@ -446,7 +446,7 @@ if ($this->reqMana % 20 < 10) //CIP must have been bored when they invented this
   else
     $this->reqMana = $this->reqMana - ($this->reqMana % 20) + 20;
 
-return $this->reqMana;
+return intval($this->reqMana);
 
 }
 
@@ -459,7 +459,7 @@ public function getMagicLevelPercent() {
 $this->getMana();
 $this->magicLevelPercent = intval(100*($this->mana['spent']/(1.* $this->getRequiredMana($this->getMagicLevel() + 1) )));
 
-return $this->magicLevelPercent;
+return intval($this->magicLevelPercent);
 
 }
 
@@ -472,15 +472,15 @@ public function getStorageValues() {
 foreach ($this->xmlPlayer->storage->data as $item) {
 	
 	//var_dump($item);
-	$key = (string)$item['key'];
-	$value = (string)$item['value'];
+	$key = strval($item['key']);
+	$value = strval($item['value']);
 
 	//var_dump($value);
 	
 	$this->storage[$key] = $value;
 }
 
-return $this->storage;
+return $this->storage; //array
 
 }
 
