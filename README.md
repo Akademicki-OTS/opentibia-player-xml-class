@@ -36,5 +36,6 @@ getStorageValues
 getDeaths
 
 setPassword
+setPremDays
 
 ```

@@ -12,34 +12,38 @@ Github: https://github.com/PJanisio/opentibia-player-xml-class
 class xmlPlayer {
 
 //predefined variables
-
+//private
 private $dataPath = '';
 private $realPath = '';
 private $showError = 1; //shows backtrace of error message //def: 1
-
+//public
+//strings
 public $errorTxt = ''; //placeholder for error text //def: ''
 public $playerName = '';
-public $characters = array(); //names of other players on the same account
+public $skull = '';
 public $playersDir = '';
 public $accountsDir = '';
-public $xmlPlayer = NULL; //handler for player
-public $xmlAccount = NULL; //handler for account
+public $lastElement = ''; //double check if will be needed
 public $xmlPlayerFilePath = ''; //exact path for PREPARED player
 public $xmlAccountFilePath = ''; //exact path for PREPARED account
-public $account = 0;
 public $structurePlayer = '';
 public $structureAccount = '';
-public $reqMana;
-public $magicLevelPercent;
+//bools
+public $xmlPlayer = NULL; //handler for player
+public $xmlAccount = NULL; //handler for account
+//ints
+public $account = 0;
+public $food = 0;
+public $reqMana = 0;
+public $magicLevelPercent = 0;
+//arrays
+public $characters = array(); //names of other players on the same account
 public $spawn = array();
 public $temple = array();
-public $skull = '';
 public $frags = array();
 public $lastModified = array();
 public $health = array();
-public $food = 0;
 public $mana = array();
-public $lastElement = ''; //double check if will be needed
 public $storage = array();
 public $ban = array(); //ban status,start,end,comment
 public $dead = array();
