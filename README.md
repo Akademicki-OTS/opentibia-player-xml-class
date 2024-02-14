@@ -39,5 +39,6 @@ setPassword
 setPremDays
 setSex
 removeCharacter
+setBan
 
 ```

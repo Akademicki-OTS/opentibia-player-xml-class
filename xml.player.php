@@ -81,8 +81,7 @@ public function throwError($errorTxt, $showError) {
 			
 			if($showError == 1) {
 			echo $errorTxt;
-			exit();
-			//throw new Exception($this->errorTxt);			
+			throw new Exception($this->errorTxt);			
 		}
 
 }
@@ -322,13 +321,15 @@ Get ban status
 */
 public function getBanStatus() {
     
-$this->ban['status'] = intval($this->xmlPlayer['banned']); //0;1
-$this->ban['start'] = intval($this->xmlPlayer['banstart']); //timestamp
-$this->ban['end'] = intval($this->xmlPlayer['banend']); //timestamp
-$this->ban['comment'] = strval($this->xmlPlayer['comment']); 
-$this->ban['reason'] = strval($this->xmlPlayer['reason']); 
-$this->ban['deleted'] = intval($this->xmlPlayer['deleted']); //0;1
-$this->ban['finalwarning'] = intval($this->xmlPlayer['finalwarning']); //0;1
+$this->ban['status'] = intval($this->xmlPlayer->ban['banned']); //0;1
+$this->ban['start'] = intval($this->xmlPlayer->ban['banstart']); //timestamp
+$this->ban['end'] = intval($this->xmlPlayer->ban['banend']); //timestamp
+$this->ban['comment'] = strval($this->xmlPlayer->ban['comment']); 
+$this->ban['action'] = strval($this->xmlPlayer->ban['action']); 
+$this->ban['reason'] = strval($this->xmlPlayer->ban['reason']); 
+$this->ban['banrealtime'] = strval($this->xmlPlayer->ban['banrealtime']); 
+$this->ban['deleted'] = intval($this->xmlPlayer->ban['deleted']); //0;1
+$this->ban['finalwarning'] = intval($this->xmlPlayer->ban['finalwarning']); //0;1
 
 return $this->ban;
 }
@@ -611,6 +612,49 @@ public function removeCharacter($charName) {
     }
     
 }
+
+/*
+Ban player
+Args:
+duration: set in houres
+reason: will be displayed on site
+*/
+
+
+public function setBan($duration, $reason, $comment, $finalwarning, $deleted, $extend = NULL) {
+
+	$this->getBanStatus();
+	if($this->ban['status'] == 1 AND $extend == NULL) {
+
+		$this->throwError('Error: Player is already banned.', 1);
+	}
+		else {
+
+			$durationHoures = $duration*3600;
+
+			$this->xmlPlayer->ban['banned'] = 1; //0;1
+			$this->xmlPlayer->ban['banstart'] = time(); //timestamp
+			$this->xmlPlayer->ban['banend'] = time() + $durationHoures; //timestamp
+			$this->xmlPlayer->ban['banrealtime'] = date('Y-m-d H:i:s', $this->ban['end']);
+			$this->xmlPlayer->ban['comment'] = $comment;
+			$this->xmlPlayer->ban['action'] = 'Account ban - XML class';
+			$this->xmlPlayer->ban['reason'] = $reason;
+			$this->xmlPlayer->ban['deleted'] = $deleted; //0;1
+			$this->xmlPlayer->ban['finalwarning'] = $finalwarning; //0;1
+
+			$makeChange = $this->xmlPlayer->asXML($this->xmlPlayerFilePath);
+
+		}
+    
+		if($makeChange) {
+		
+			return TRUE;
+		}
+			else {
+				return FALSE;
+			}
+	
+		}
 
 //end class
 }

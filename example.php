@@ -11,15 +11,15 @@ $data = 'testbench';
 $player = new xmlPlayer($data);
 
     //open both account file and player file, you can switch to other player anytime and class will aouto-close previous one
-    if($player->prepare('Mr Black') == TRUE) {
+    $player->prepare('Uwu');
+          
+          //check if player is banned
+          $ban = $player->getBanStatus();
+            //display chosen argument
+            echo $ban['banrealtime'];
 
-          //show structure of xml file in class way
-          $player->showStructurePlayer();
-
-    }
-    
-    
-
-  
+            //show structure of xml file in class way
+         $player->showStructurePlayer();
+ 
 
 ?>
