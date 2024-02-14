@@ -81,7 +81,7 @@ public function throwError($errorTxt, $showError) {
 			
 			if($showError == 1) {
 			echo $errorTxt;
-			throw new Exception($this->errorTxt);			
+			//throw new Exception($this->errorTxt);			
 		}
 
 }
@@ -548,36 +548,32 @@ public function setPremDays($count) {
 
 
 /*
-Remove character from account
+Remove character from account and delete player file
 */
-
-//test it
 
 public function removeCharacter($charName) {
     
-	$charArray = $this->getCharacters();
-	foreach($charArray as $seg) {
-
+	foreach($this->xmlAccount->characters->character as $seg) {
+        
 		if($seg['name'] == $charName) {
-	
+		    //remove child attribute from account file
 			$dom = dom_import_simplexml($seg);
 			$dom->parentNode->removeChild($dom);
-		}
-
-	}
-
-	$makeChange = $this->xmlAccount->asXML($this->xmlAccountFilePath);
-	if($makeChange) {
-		
-		return TRUE;
-	}
-		else {
-			return FALSE;
-		}
-
-	}
-
-
+			$makeChange = $this->xmlAccount->asXML($this->xmlAccountFilePath);
+			//remove player file
+			$makeRemove = unlink($this->xmlPlayerFilePath);
+			    
+        	}
+    }
+    if(isset($makeChange) AND isset($makeRemove)) {
+        
+        return TRUE;
+    }
+    else {
+        return FALSE;
+    }
+    
+}
 
 //end class
 }
