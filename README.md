@@ -37,6 +37,7 @@ getDeaths
 
 setPassword
 setPremDays
+setSex
 removeCharacter
 
 ```

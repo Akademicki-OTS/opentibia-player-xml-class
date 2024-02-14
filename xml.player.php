@@ -81,6 +81,7 @@ public function throwError($errorTxt, $showError) {
 			
 			if($showError == 1) {
 			echo $errorTxt;
+			exit();
 			//throw new Exception($this->errorTxt);			
 		}
 
@@ -196,6 +197,13 @@ for($k =0; $k < count($this->xmlAccount->characters->character); $k++) {
 
 /*
 Get sex
+enum playersex_t {
+	PLAYERSEX_FEMALE = 0,
+	PLAYERSEX_MALE = 1,
+	PLAYERSEX_OLDMALE = 2,
+	PLAYERSEX_DWARF = 3,
+	PLAYERSEX_NIMFA = 4, 
+};
 */
 public function getSex() {
 
@@ -548,6 +556,33 @@ public function setPremDays($count) {
 
 
 /*
+Set sex
+*/
+
+public function setSex($number) {
+
+	if($number >= 0 AND $number < 5) {
+
+		$this->xmlPlayer['sex'] = $number;
+		$makeChange = $this->xmlPlayer->asXML($this->xmlPlayerFilePath);
+
+	}
+	else {
+			$this->throwError('Error: Range of arguments allowed: 0-4', 1);
+	}
+    
+	if($makeChange) {
+		
+		return TRUE;
+	}
+		else {
+			return FALSE;
+		}
+		
+}
+
+
+/*
 Remove character from account and delete player file
 */
 
@@ -562,8 +597,10 @@ public function removeCharacter($charName) {
 			$makeChange = $this->xmlAccount->asXML($this->xmlAccountFilePath);
 			//remove player file
 			$makeRemove = unlink($this->xmlPlayerFilePath);
-			    
         	}
+			else {
+				$this->throwError('Error: Player doesn`t exists.', 1);
+		}
     }
     if(isset($makeChange) AND isset($makeRemove)) {
         

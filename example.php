@@ -11,7 +11,7 @@ $data = 'testbench';
 $player = new xmlPlayer($data);
 
     //open both account file and player file, you can switch to other player anytime and class will aouto-close previous one
-    if($player->prepare('Mr Black')) == TRUE {
+    if($player->prepare('Mr Black') == TRUE) {
 
           //show structure of xml file in class way
           $player->showStructurePlayer();
