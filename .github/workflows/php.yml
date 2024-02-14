@@ -1,4 +1,8 @@
 on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
 steps:
 - name: player-xml-class
   uses: shivammathur/setup-php@v2
