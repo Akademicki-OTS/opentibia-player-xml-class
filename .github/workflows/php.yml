@@ -1,14 +1,36 @@
-on: push
+name: Testing suite
+
+on:
+    push:
+        branches:
+            - master
+    pull_request:
+        branches:
+            - master
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-steps:
-- name: player-xml-class
-  uses: shivammathur/setup-php@v2
-  with:
-    php-version: '8.3'
-    extensions: mbstring, intl
-    ini-values: post_max_size= 16M, max_execution_time=60
-    coverage: xdebug
-    tools: php-cs-fixer, phpunit
+    unit-tests-on-each-php-version:
+        runs-on: ${{ matrix.os }}
+        strategy:
+            matrix:
+                os: [ubuntu-latest]
+                php-versions: ['7.2', '7.3', '7.4', '8.3']
+        name: PHP ${{ matrix.php-versions }} Test on ${{ matrix.os }}
+        steps:
+            - name: Check out repository
+              uses: actions/checkout@v2
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: ${{ matrix.php-versions }}
+                  extensions: mbstring, intl, zip
+
+            - name: Run phpstan
+              run: make phpstan > phpstan.analyse.txt
+
+            - name: Upload phpstan analyse result
+              uses: actions/upload-artifact@v2
+              with:
+                  name: phpstan
+                  path: phpstan.analyse.txt
