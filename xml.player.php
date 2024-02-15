@@ -1,7 +1,7 @@
 <?php
 /*
 Open Tibia XML player class
-Version: 0.2.10
+Version: 0.2.11
 Author: Pawel 'Pavlus' Janisio
 License: MIT
 Github: https://github.com/PJanisio/opentibia-player-xml-class
@@ -375,16 +375,12 @@ $this->skull = $this->xmlPlayer->skull['type'];
 switch ($this->skull) {
 	case 1:
 		return $this->skull = 'YELLOW_SKULL';
-		break;
 	case 3:
 		return $this->skull = 'WHITE_SKULL';
-		break;
 	case 4:
 		return $this->skull = 'RED_SKULL';
-		break;
 	default:
 		return $this->skull = 'NO_SKULL';
-		break;
 					}
 
 }
@@ -629,6 +625,11 @@ public function setBan($duration, $reason, $comment, $finalwarning, $deleted, $e
 		$this->throwError('Error: Player is already banned.', 1);
 	}
 		else {
+				//check if player has already finalwarning if so, put deleted
+			if($this->ban['finalwarning'] == 1) {
+
+				$deleted = 1;
+			}
 
 			$durationHoures = $duration*3600;
 
@@ -655,6 +656,55 @@ public function setBan($duration, $reason, $comment, $finalwarning, $deleted, $e
 			}
 	
 		}
+
+
+/*
+Unban player
+Optional args:
+removeFW - removing final warning
+removeDel - removing perm ban
+*/
+
+public function removeBan($removeFW = NULL, $removeDel = NULL) {
+
+	$this->getBanStatus();
+	if($this->ban['status'] == 0) {
+
+		$this->throwError('Error: Player is not banned. Dont need any action', 1);
+	}
+		else {
+
+
+			$this->xmlPlayer->ban['banned'] = 0; //0;1
+			$this->xmlPlayer->ban['banstart'] = 0; //timestamp
+			$this->xmlPlayer->ban['banend'] = 0; //timestamp
+			$this->xmlPlayer->ban['banrealtime'] = '';
+			$this->xmlPlayer->ban['comment'] = '';
+			$this->xmlPlayer->ban['action'] = '';
+			$this->xmlPlayer->ban['reason'] = '';
+
+			if($removeFW == 1) {
+				$this->xmlPlayer->ban['finalwarning'] = 0; //0;1
+			}
+			if($removeDel == 1 ) {
+				$this->xmlPlayer->ban['deleted'] = 0; //0;1
+			}
+			$makeChange = $this->xmlPlayer->asXML($this->xmlPlayerFilePath);
+
+		}
+    
+		if($makeChange) {
+		
+			return TRUE;
+		}
+			else {
+				return FALSE;
+			}
+	
+		}
+
+
+	
 
 //end class
 }

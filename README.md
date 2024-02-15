@@ -40,5 +40,6 @@ setPremDays
 setSex
 removeCharacter
 setBan
+removeBan
 
 ```
