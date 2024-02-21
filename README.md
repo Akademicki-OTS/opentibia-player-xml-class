@@ -15,6 +15,7 @@ getSex
 getLookdir
 getExp
 getVocation
+getVocationName
 getLevel
 getAccess
 getCapacity

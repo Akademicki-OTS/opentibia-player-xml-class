@@ -20,6 +20,5 @@ $player = new xmlPlayer($data);
 
             //show structure of xml file in class way
          $player->showStructurePlayer();
- 
 
 ?>

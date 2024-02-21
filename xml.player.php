@@ -28,6 +28,7 @@ public $xmlPlayerFilePath = ''; //exact path for PREPARED player
 public $xmlAccountFilePath = ''; //exact path for PREPARED account
 public $structurePlayer = '';
 public $structureAccount = '';
+public $vocationName = '';
 //bools
 public $xmlPlayer = NULL; //handler for player
 public $xmlAccount = NULL; //handler for account
@@ -233,10 +234,69 @@ return intval($this->xmlPlayer['exp']);
 
 /*
 Get vocation
+enum playervoc_t {
+	VOCATION_NONE = 0,
+	VOCATION_SORCERER = 1,
+	VOCATION_DRUID = 2,
+	VOCATION_PALADIN = 3,
+	VOCATION_KNIGHT = 4
+};
 */
 public function getVocation() {
 
 return intval($this->xmlPlayer['voc']);
+
+}
+
+/*
+Get vocation name and check promotion
+*/
+public function getVocationName() {
+
+	$vocation = $this->getVocation();
+	$promotion = $this->getPromotion();
+
+
+	switch ([$vocation, $promotion]) {
+		case [0, 0]:
+			$this->vocationName = 'No vocation';
+		break;
+	
+		case [1, 0]:
+			$this->vocationName = 'Sorcerer';
+		break;
+
+		case [1, 1]:
+			$this->vocationName = 'Master Sorcerer';
+		break;
+
+		case [2, 0]:
+			$this->vocationName = 'Druid';
+		break;
+
+		case [2, 1]:
+			$this->vocationName = 'Elder Druid';
+		break;
+
+		case [3, 0]:
+			$this->vocationName = 'Paladin';
+		break;
+
+		case [3, 1]:
+			$this->vocationName = 'Royal Paladin';
+		break;
+
+		case [4, 0]:
+			$this->vocationName = 'Knight';
+		break;
+
+		case [4, 1]:
+			$this->vocationName = 'Elite Knight';
+		break;
+		
+	}
+
+	return $this->vocationName;
 
 }
 
