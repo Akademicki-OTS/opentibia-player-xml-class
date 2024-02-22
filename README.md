@@ -14,6 +14,9 @@ getCharacters
 getSex
 getLookdir
 getExp
+getExpForLevel
+getExpForNextLevel
+getExpPercentNextLevel
 getVocation
 getVocationName
 getLevel

@@ -1,7 +1,7 @@
 <?php
 /*
 Open Tibia XML player class
-Version: 0.2.11
+Version: 0.2.12
 Author: Pawel 'Pavlus' Janisio
 License: MIT
 Github: https://github.com/PJanisio/opentibia-player-xml-class
@@ -32,11 +32,14 @@ public $vocationName = '';
 //bools
 public $xmlPlayer = NULL; //handler for player
 public $xmlAccount = NULL; //handler for account
-//ints
+//ints and floats
 public $account = 0;
 public $food = 0;
 public $reqMana = 0;
 public $magicLevelPercent = 0;
+public $expNextLevel = 0;
+public $expPercNextLevel = 0;
+public $expLevel = 0;
 //arrays
 public $characters = array(); //names of other players on the same account
 public $spawn = array();
@@ -230,6 +233,59 @@ public function getExp() {
 return intval($this->xmlPlayer['exp']);
 
 }
+
+
+/*
+Get experience for any level
+specialDivider works when custom formula is used to calculate experience
+*/
+
+public function getExpForLevel($level, $specialDivider = 1) {
+
+	$this->expLevel = $this->expLevel = ((((50*$level/3 - 100)*$level + 850/3)*$level - 200)/$specialDivider);
+
+	return intval($this->expLevel);
+	
+	}
+
+/*
+Get experience for player next level
+*/
+
+public function getExpForNextLevel($specialDivider = 1) {
+
+	$currentExp = $this->getExp();
+	$nextLevel = $this->getLevel() +  1;
+
+		//get exp for next level
+	$this->expNextLevel = ((((50*$nextLevel/3 - 100)*$nextLevel + 850/3)*$nextLevel - 200)/$specialDivider) - $currentExp;
+
+	return intval($this->expNextLevel);
+	
+	}
+
+
+
+/*
+Get percentage value for next level
+*/
+
+public function getExpPercentNextLevel($specialDivider = 1) {
+
+	$currentLevelExp = $this->getExpForLevel($this->getLevel(), $specialDivider);
+	$nextLevelExp = $this->getExpForLevel($this->getLevel()+1, $specialDivider);
+	$expForNextLvl = $this->getExpForNextLevel(5);
+
+	
+
+	$this->expPercNextLevel = round(($expForNextLvl/($nextLevelExp - $currentLevelExp))*100, 2);
+		
+
+	return floatval($this->expPercNextLevel); //return percent
+	
+	}
+
+
 
 
 /*
@@ -738,7 +794,8 @@ public function removeBan($removeFW = NULL, $removeDel = NULL) {
 			$this->xmlPlayer->ban['banned'] = 0; //0;1
 			$this->xmlPlayer->ban['banstart'] = 0; //timestamp
 			$this->xmlPlayer->ban['banend'] = 0; //timestamp
-			$this->xmlPlayer->ban['banrealtime'] = '';
+			//we do not clear banrealtime to get information when last ban happened
+			//$this->xmlPlayer->ban['banrealtime'] = '';
 			$this->xmlPlayer->ban['comment'] = '';
 			$this->xmlPlayer->ban['action'] = '';
 			$this->xmlPlayer->ban['reason'] = '';

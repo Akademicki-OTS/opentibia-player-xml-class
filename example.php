@@ -10,15 +10,25 @@ $data = 'testbench';
 //start constructor
 $player = new xmlPlayer($data);
 
+
+$playerName = 'Uwu'; // we will deal with this player :)
+
     //open both account file and player file, you can switch to other player anytime and class will aouto-close previous one
-    $player->prepare('Uwu');
+    if($player->prepare($playerName) == TRUE) {
+
+      echo 'Player '.$playerName.' has been loaded <br>';
+
+    }
           
-          //check if player is banned
+          //check if player has finalwarning flag
           $ban = $player->getBanStatus();
             //display chosen argument
-            echo $ban['banrealtime'];
+            echo 'Finalwarning: '.$ban['finalwarning'].'<br>';
 
-            //show structure of xml file in class way
+            //lets see how many percent he needs for next level
+         echo 'He needs:'.$player->getExpPercentNextLevel().' % for next level<br><br>';
+
+          echo 'Struture of xml player file: <br>';
+         //show structure of xml file in class way
          $player->showStructurePlayer();
-
 ?>
