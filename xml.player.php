@@ -267,24 +267,20 @@ public function getExpForNextLevel($specialDivider = 1) {
 
 
 /*
-Get percentage value for next level
+Get percentage value for next level as float
 */
 
 public function getExpPercentNextLevel($specialDivider = 1) {
 
 	$currentLevelExp = $this->getExpForLevel($this->getLevel(), $specialDivider);
 	$nextLevelExp = $this->getExpForLevel($this->getLevel()+1, $specialDivider);
-	$expForNextLvl = $this->getExpForNextLevel(5);
+	$expForNextLvl = $this->getExpForNextLevel($specialDivider);
 
-	
-
-	$this->expPercNextLevel = round(($expForNextLvl/($nextLevelExp - $currentLevelExp))*100, 2);
+	$this->expPercNextLevel = round(($expForNextLvl/($nextLevelExp - $currentLevelExp)*100), 1);
 		
-
-	return floatval($this->expPercNextLevel); //return percent
+	return floatval(abs($this->expPercNextLevel)); //return percent
 	
 	}
-
 
 
 
