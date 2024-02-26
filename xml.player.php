@@ -41,7 +41,7 @@ public $expNextLevel = 0;
 public $expPercNextLevel = 0;
 public $expLevel = 0;
 //arrays
-public $skills = arrray();
+public $skills = array();
 public $characters = array(); //names of other players on the same account
 public $spawn = array();
 public $temple = array();
@@ -845,7 +845,7 @@ Set access
 
 public function setAccess($number) {
 
-		$this->xmlPlayer['accesss'] = $number;
+		$this->xmlPlayer['accesss'] = intval($number);
 		$makeChange = $this->xmlPlayer->asXML($this->xmlPlayerFilePath);
 
 	if($makeChange) {
@@ -857,6 +857,45 @@ public function setAccess($number) {
 		}
 		
 }
+
+
+
+/*
+Set promotion
+*/
+public function setPromotion($number) {
+
+	$this->xmlPlayer['promoted'] = intval($number);
+		$makeChange = $this->xmlPlayer->asXML($this->xmlPlayerFilePath);
+
+	if($makeChange) {
+		
+		return TRUE;
+	}
+		else {
+			return FALSE;
+		}
+	
+	}
+
+
+/*
+Set capacity
+*/
+public function setCapacity($number) {
+
+	$this->xmlPlayer['cap'] = intval($number);
+		$makeChange = $this->xmlPlayer->asXML($this->xmlPlayerFilePath);
+
+	if($makeChange) {
+		
+		return TRUE;
+	}
+		else {
+			return FALSE;
+		}
+	
+	}
 
 
 	

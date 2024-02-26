@@ -54,5 +54,7 @@ removeCharacter
 setBan
 removeBan
 setAccess
+setPromotion
+setCapacity
 
 ```

@@ -28,6 +28,11 @@ $playerName = 'Pavlus'; // we will deal with this player :)
             //lets see how many percent he needs for next level
          echo 'He needs:'.$player->getExpPercentNextLevel().' % for next level<br><br>';
 
+         $skills = $player->getSkills();
+
+          echo 'club skill level: '.$skills['club'].'<br>';
+          echo 'shield skill level: '.$skills['shield'].'<br>';
+
           echo 'Struture of xml player file: <br>';
          //show structure of xml file in class way
          $player->showStructurePlayer();
