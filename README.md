@@ -3,6 +3,8 @@ PHP class for retriving and edition of XML player file for open tibia server wit
 
 ## Class Methods:
 
+### Get data
+
 ```php
 prepare
 showStructurePlayer
@@ -20,6 +22,7 @@ getExpPercentNextLevel
 getVocation
 getVocationName
 getLevel
+getSkills
 getAccess
 getCapacity
 getBless
@@ -39,11 +42,17 @@ getMagicLevelPercent
 getStorageValues
 getDeaths
 
+```
+
+### Set data
+
+```php
 setPassword
 setPremDays
 setSex
 removeCharacter
 setBan
 removeBan
+setAccess
 
 ```

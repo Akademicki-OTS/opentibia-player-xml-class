@@ -41,6 +41,7 @@ public $expNextLevel = 0;
 public $expPercNextLevel = 0;
 public $expLevel = 0;
 //arrays
+public $skills = arrray();
 public $characters = array(); //names of other players on the same account
 public $spawn = array();
 public $temple = array();
@@ -361,6 +362,25 @@ public function getLevel() {
 return intval($this->xmlPlayer['level']);
 
 }
+
+
+/*
+Get skill levels
+*/
+public function getSkills() {
+
+
+	$this->skills['fist'] = intval($this->xmlPlayer->skills->skill[0]['level']);
+	$this->skills['club'] = intval($this->xmlPlayer->skills->skill[1]['level']);
+	$this->skills['sword'] = intval($this->xmlPlayer->skills->skill[2]['level']);
+	$this->skills['axe'] = intval($this->xmlPlayer->skills->skill[3]['level']);
+	$this->skills['distance'] = intval($this->xmlPlayer->skills->skill[4]['level']);
+	$this->skills['shield'] = intval($this->xmlPlayer->skills->skill[5]['level']);
+
+
+	return $this->skills; //array
+	
+	}
 
 /*
 Get access
@@ -815,6 +835,28 @@ public function removeBan($removeFW = NULL, $removeDel = NULL) {
 			}
 	
 		}
+
+
+
+
+/*
+Set access
+*/
+
+public function setAccess($number) {
+
+		$this->xmlPlayer['accesss'] = $number;
+		$makeChange = $this->xmlPlayer->asXML($this->xmlPlayerFilePath);
+
+	if($makeChange) {
+		
+		return TRUE;
+	}
+		else {
+			return FALSE;
+		}
+		
+}
 
 
 	
