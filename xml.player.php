@@ -15,6 +15,7 @@ class xmlPlayer {
 //private
 private $dataPath = '';
 private $realPath = '';
+private $housesPath = '';
 private $showError = 1; //shows backtrace of error message //def: 1
 //public
 //strings
@@ -74,6 +75,7 @@ $this->dataPath = $dataPath;
 			{
 			$this->playersDir = $this->realPath.'/players/';
 			$this->accountsDir = $this->realPath.'/accounts/';
+			$this->housesPath = $this->realPath.'/houses/';
 			}	
 
 }
@@ -576,6 +578,7 @@ return $this->mana;
 /*
 Get required mana level
 cpp source -> unsigned int Player::getReqMana(int maglevel, playervoc_t voc)
+not tested yet :)
 */
 public function getRequiredMana($mlevel = NULL) {
 
@@ -611,8 +614,30 @@ return intval($this->magicLevelPercent);
 
 
 /*
-Get storage values from scripts
+Get houses players own or is invited
 */
+public function getHouses() {
+
+	//prototype
+
+	/*
+	search where name of player is inside /houses
+	if found open using simplexml or xpath
+	get the node name
+	add name of file and node name to array
+	return array
+	done kurwa!
+	*/
+
+
+	//$nodes = $xml->xpath("//*[contains(text(), 'Find me')]");
+	
+	
+
+}
+
+
+
 public function getStorageValues() {
 
 foreach ($this->xmlPlayer->storage->data as $item) {
@@ -637,6 +662,9 @@ public function getDeaths() {
        return $this->dead; //array of objects
 
 }
+
+
+
 
 
 /*
@@ -713,9 +741,10 @@ public function setSex($number) {
 
 /*
 Remove character from account and delete player file
+set second argument to TRUE if you want to remove account file altogether
 */
 
-public function removeCharacter($charName) {
+public function removeCharacter($charName, $accountRemove = NULL) {
     
 	foreach($this->xmlAccount->characters->character as $seg) {
         
@@ -726,12 +755,15 @@ public function removeCharacter($charName) {
 			$makeChange = $this->xmlAccount->asXML($this->xmlAccountFilePath);
 			//remove player file
 			$makeRemove = unlink($this->xmlPlayerFilePath);
+				if($accountRemove == TRUE) {
+					$makeRemoveAcc = unlink($this->xmlAccountFilePath);
+				}
         	}
 			else {
 				$this->throwError('Error: Player doesn`t exists.', 1);
 		}
     }
-    if(isset($makeChange) AND isset($makeRemove)) {
+    if(isset($makeChange) AND isset($makeRemove) AND isset($makeRemoveAcc)) {
         
         return TRUE;
     }
