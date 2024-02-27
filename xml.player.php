@@ -617,7 +617,6 @@ return intval($this->magicLevelPercent);
 /*
 Get houses players own or is invited
 this method doesnt need to use prepare for the player file
-not tested yet
 */
 public function getHouses($playerName) {
 
@@ -626,37 +625,57 @@ public function getHouses($playerName) {
 	$houses = glob($this->housesPath.'*.xml');
 
 
-		foreach($houses as $house){
+		foreach($houses as $house) {
 				//opens a file
 				$open = htmlentities(file_get_contents($house));
 				//check if player is found
+				//var_dump($open);
 				$found = strpos($open, $playerName);
-
+				
 				if($found > 0) {
 					//add housename to array
 					//we can use later to display houises name player owns
-					$houseFound[] .= $house; 
-				}
-				else {
-
-					return $this->house['count'] = 0; //player doesnt have any houses
+					$houseFound[] = $house; 
 				}
 
 			}
-				foreach($houseFound as $playerHouse){
-					//lets open and check what the node name is
+			$this->house['count'] = count($houseFound);
+			$this->house['owner'] = '';
+			$this->house['subowner'] = '';
+			$this->house['guest'] = '';
+			$this->house['doorowner'] = '';
+
+				foreach($houseFound as $playerHouse) {
+					//lets open each house and check access rights for player
 					$xml = simplexml_load_file($playerHouse);
-					$this->house['name'] = basename($playerHouse, '.xml').PHP_EOL;
-					//var_dump($xml);
+
+					
+
+					while($xml->owner['name'] == $playerName) {
+						$this->house['owner'] .= basename($playerHouse, '.xml');
+						break;
+
+					}
+					while ($xml->subowner['name'] == $playerName) {
+						$this->house['subowner'] .= basename($playerHouse, '.xml');
+						break;
+					}
+
+					while($xml->guest['name'] == $playerName) {
+						$this->house['guest'] .= basename($playerHouse, '.xml');
+						break;
+					}
+
+					while($xml->doorowner['name'] == $playerName) {
+						$this->house['doorowner'] .= basename($playerHouse, '.xml');
+						break;
+					}
 			}
 
-			//return array of informations like count houses, houses names and houses ownership
-			//todo - several houses or several guests and subowners check
-			 $this->house['count'] = count($houseFound);
-			 $this->house['housename'] = basename($playerHouse, '.xml').PHP_EOL;
-			 $this->house['owner'] = $xml->owner['name'];
-			 $this->house['subowner'] = $xml->subowner['name'];
-			 $this->house['guest'] = $xml->guest['name'];
+			
+			 return $this->house;
+
+
 
 
 }

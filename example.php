@@ -34,16 +34,20 @@ $playerName = 'Pavlus'; // we will deal with this player :)
           echo 'shield skill level: '.$skills['shield'].'<br>';
 
           
+            //check player houses
+           $player->getHouses('Pavlus');
 
-        $player->getHouses('Pavlus');
+       if($player->house['count'] > 0) {
 
-          if($player->house['count'] > 1) {
 
-        echo $player->house['owner'] .' owns a '.$player->house['housename'].'<br>';
+      // echo 'Owns: '.$player->house['owner'].'<br>';
+        echo 'Subowns: '.$player->house['subowner'].'<br>';
+       // echo 'Guest of: '.$player->house['guest'].'<br>';
+       //echo 'Doorowner of: '.$player->house['doorowner'].'<br><br>';
 
-                 }
+                }
 
          //show structure of xml file in class way
-         echo 'Struture of xml player file: <br>';
+       echo 'Struture of xml player file: <br>';
          $player->showStructurePlayer();
 ?>
