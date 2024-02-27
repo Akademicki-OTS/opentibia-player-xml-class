@@ -33,7 +33,17 @@ $playerName = 'Pavlus'; // we will deal with this player :)
           echo 'club skill level: '.$skills['club'].'<br>';
           echo 'shield skill level: '.$skills['shield'].'<br>';
 
-          echo 'Struture of xml player file: <br>';
+          
+
+        $player->getHouses('Pavlus');
+
+          if($player->house['count'] > 1) {
+
+        echo $player->house['owner'] .' owns a '.$player->house['housename'].'<br>';
+
+                 }
+
          //show structure of xml file in class way
+         echo 'Struture of xml player file: <br>';
          $player->showStructurePlayer();
 ?>

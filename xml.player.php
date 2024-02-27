@@ -53,6 +53,7 @@ public $mana = array();
 public $storage = array();
 public $ban = array(); //ban status,start,end,comment
 public $dead = array();
+public $house = array();
 
 /*
 Checks paths and define directories
@@ -622,49 +623,41 @@ public function getHouses($playerName) {
 
 	$houseFound = array(); //start array where player is stored
 
-
 	$houses = glob($this->housesPath.'*.xml');
+
 
 		foreach($houses as $house){
 				//opens a file
-				$open = trim(file_get_contents($house));
+				$open = htmlentities(file_get_contents($house));
 				//check if player is found
-				$found = strpos($playerName, $house);
+				$found = strpos($open, $playerName);
 
-				if($found === TRUE) {
+				if($found > 0) {
 					//add housename to array
 					//we can use later to display houises name player owns
-					$houseFound[] = $house; 
-					//lets open and check what the node name is
-					$xml = simplexml_load_string($house);
-					$xml->registerXPathNamespace('xhtml', 'http://www.w3.org/1999/xhtml');
+					$houseFound[] .= $house; 
+				}
+				else {
 
-					$nodes = $xml->xpath("//*[contains(text(), '.$playerName.')]");
-						var_dump($nodes);
-
+					return $this->house['count'] = 0; //player doesnt have any houses
 				}
 
-			 //return array of informations like count houses, houses names and houses ownership
-
-
+			}
+				foreach($houseFound as $playerHouse){
+					//lets open and check what the node name is
+					$xml = simplexml_load_file($playerHouse);
+					$this->house['name'] = basename($playerHouse, '.xml').PHP_EOL;
+					//var_dump($xml);
 			}
 
+			//return array of informations like count houses, houses names and houses ownership
+			//todo - several houses or several guests and subowners check
+			 $this->house['count'] = count($houseFound);
+			 $this->house['housename'] = basename($playerHouse, '.xml').PHP_EOL;
+			 $this->house['owner'] = $xml->owner['name'];
+			 $this->house['subowner'] = $xml->subowner['name'];
+			 $this->house['guest'] = $xml->guest['name'];
 
-	//prototype
-
-	/*
-	search where name of player is inside /houses
-	if found open using simplexml or xpath
-	get the node name
-	add name of file and node name to array
-	return array
-	done kurwa!
-	*/
-
-
-	//$nodes = $xml->xpath("//*[contains(text(), 'Find me')]");
-	
-	
 
 }
 
