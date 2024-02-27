@@ -615,8 +615,40 @@ return intval($this->magicLevelPercent);
 
 /*
 Get houses players own or is invited
+this method doesnt need to use prepare for the player file
+not tested yet
 */
-public function getHouses() {
+public function getHouses($playerName) {
+
+	$houseFound = array(); //start array where player is stored
+
+
+	$houses = glob($this->housesPath.'*.xml');
+
+		foreach($houses as $house){
+				//opens a file
+				$open = trim(file_get_contents($house));
+				//check if player is found
+				$found = strpos($playerName, $house);
+
+				if($found === TRUE) {
+					//add housename to array
+					//we can use later to display houises name player owns
+					$houseFound[] = $house; 
+					//lets open and check what the node name is
+					$xml = simplexml_load_string($house);
+					$xml->registerXPathNamespace('xhtml', 'http://www.w3.org/1999/xhtml');
+
+					$nodes = $xml->xpath("//*[contains(text(), '.$playerName.')]");
+						var_dump($nodes);
+
+				}
+
+			 //return array of informations like count houses, houses names and houses ownership
+
+
+			}
+
 
 	//prototype
 
@@ -934,5 +966,3 @@ public function setCapacity($number) {
 
 //end class
 }
-
-?>
