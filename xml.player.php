@@ -963,6 +963,43 @@ public function setCapacity($number) {
 
 
 	
+/*
+Change player name
+TODO: change name in guilds and houses
+*/
+public function setName($name) {
+
+		//changing player file
+	$currentName = $this->xmlPlayer['name'];
+
+	$this->xmlPlayer['name'] = strval($name);
+		$makeChange = $this->xmlPlayer->asXML($this->xmlPlayerFilePath);
+
+	$rename = rename($this->xmlPlayerFilePath, $this->playersDir.$name);
+	 //changing account file
+
+	 foreach($this->xmlAccount->characters->character as $seg) {
+        
+		if($seg['name'] == $currentName) {
+
+			$seg['name'] = trim($name);
+			$makeChangeAcc = $this->xmlAccount->asXML($this->xmlAccountFilePath);
+		}
+
+	}
+
+	if($makeChange AND $makeChangeAcc) {
+		
+		return TRUE;
+	}
+		else {
+			return FALSE;
+		}
+	
+	}
+
+
+	
 
 //end class
 }

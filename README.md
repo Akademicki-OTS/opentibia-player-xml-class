@@ -39,6 +39,7 @@ getFoodLevel
 getMana
 getRequiredMana
 getMagicLevelPercent
+//getHouses
 getStorageValues
 getDeaths
 
@@ -56,5 +57,6 @@ removeBan
 setAccess
 setPromotion
 setCapacity
+//setName
 
 ```
