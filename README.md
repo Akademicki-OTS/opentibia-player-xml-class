@@ -39,7 +39,7 @@ getFoodLevel
 getMana
 getRequiredMana
 getMagicLevelPercent
-//getHouses
+getHouses
 getStorageValues
 getDeaths
 

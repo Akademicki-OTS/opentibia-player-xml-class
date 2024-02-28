@@ -1,7 +1,7 @@
 <?php
 /*
 Open Tibia XML player class
-Version: 0.2.12
+Version: 0.2.13
 Author: Pawel 'Pavlus' Janisio
 License: MIT
 Github: https://github.com/PJanisio/opentibia-player-xml-class
@@ -639,43 +639,55 @@ public function getHouses($playerName) {
 				}
 
 			}
+			//we need to define empty strings
 			$this->house['count'] = count($houseFound);
 			$this->house['owner'] = '';
 			$this->house['subowner'] = '';
-			$this->house['guest'] = '';
 			$this->house['doorowner'] = '';
+			$this->house['guest'] = '';
 
 				foreach($houseFound as $playerHouse) {
 					//lets open each house and check access rights for player
 					$xml = simplexml_load_file($playerHouse);
+					//var_dump($xml);
 
-					
 
-					while($xml->owner['name'] == $playerName) {
-						$this->house['owner'] .= basename($playerHouse, '.xml');
-						break;
+					//now we need to iterate of each ownership tag
+					foreach($xml->owner as $owner) {
 
-					}
-					while ($xml->subowner['name'] == $playerName) {
-						$this->house['subowner'] .= basename($playerHouse, '.xml');
-						break;
-					}
+						if($owner['name'] == $playerName) {
 
-					while($xml->guest['name'] == $playerName) {
-						$this->house['guest'] .= basename($playerHouse, '.xml');
-						break;
+							$this->house['owner'] .= basename($playerHouse, '.xml').', ';
+						}
 					}
 
-					while($xml->doorowner['name'] == $playerName) {
-						$this->house['doorowner'] .= basename($playerHouse, '.xml');
-						break;
+					foreach($xml->subowner as $subowner) {
+							
+						if($subowner['name'] == $playerName) {
+
+							$this->house['subowner'] .= basename($playerHouse, '.xml').', ';
+						}
 					}
+					foreach($xml->doorowner as $doorowner) {
+
+						if($doorowner['name'] == $playerName) {
+
+							$this->house['doorowner'] .= basename($playerHouse, '.xml').', ';
+						}
+					}
+
+					foreach($xml->guest as $guest) {
+
+						if($guest['name'] == $playerName) {
+
+							$this->house['guest'] .= basename($playerHouse, '.xml').', ';
+						}
+					}
+
 			}
 
 			
-			 return $this->house;
-
-
+			 return $this->house; //return array of houses and rights
 
 
 }
