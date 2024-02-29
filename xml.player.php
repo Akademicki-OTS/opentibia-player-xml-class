@@ -1023,6 +1023,98 @@ public function setName($name) {
 	}
 
 
+
+
+
+/*
+This method can not be used as game engine stores houses information in memory and will overwrite saved data
+*/
+
+/*
+
+
+public function removePlayersHouses($playerName) {
+
+	$houseFound = array(); //start array where player is stored
+
+	$houses = glob($this->housesPath.'*.xml');
+
+
+		foreach($houses as $house) {
+				//opens a file
+				$open = htmlentities(file_get_contents($house));
+				//check if player is found
+				//var_dump($open);
+				$found = strpos($open, $playerName);
+				
+				if($found > 0) {
+					//add housename to array
+					//we can use later to display houises name player owns
+					$houseFound[] = $house; 
+				}
+
+			}
+			//we need to define empty strings
+			$this->house['count'] = count($houseFound);
+			
+
+				foreach($houseFound as $playerHouse) {
+					//lets open each house and check access rights for player
+					$xml = simplexml_load_file($playerHouse);
+					//var_dump($xml);
+
+
+					//now we need to iterate of each ownership tag and delete the node
+					foreach($xml->owner as $owner) {
+
+						if($owner['name'] == $playerName) {
+
+							unset($xml->owner['name']);
+						}
+					}
+
+					foreach($xml->subowner as $subowner) {
+							
+						if($subowner['name'] == $playerName) {
+
+							unset($xml->subowner['name']);
+						}
+					}
+					foreach($xml->doorowner as $doorowner) {
+
+						if($doorowner['name'] == $playerName) {
+
+							unset($xml->doorowner['name']);
+						}
+					}
+
+					foreach($xml->guest as $guest) {
+
+						if($guest['name'] == $playerName) {
+
+							unset($xml->guest['name']);
+						}
+					}
+
+
+					$makeChange = $xml->asXML($playerHouse);
+
+			}
+
+			
+			if($makeChange) {
+		
+				return TRUE;
+			}
+				else {
+					return FALSE;
+				}
+			
+			}
+
+*/
+
+
 	
 
 //end class
