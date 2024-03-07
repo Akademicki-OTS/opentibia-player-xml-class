@@ -16,6 +16,8 @@ class xmlPlayer {
 private $dataPath = '';
 private $realPath = '';
 private $housesPath = '';
+private $mapPath = '';
+private $monsterPath = '';
 private $showError = 1; //shows backtrace of error message //def: 1
 //public
 //strings
@@ -77,6 +79,8 @@ $this->dataPath = $dataPath;
 			$this->playersDir = $this->realPath.'/players/';
 			$this->accountsDir = $this->realPath.'/accounts/';
 			$this->housesPath = $this->realPath.'/houses/';
+			$this->mapPath = $this->realPath.'/world/';
+			$this->monsterPath = $this->realPath.'/monster/';
 			}	
 
 }
@@ -989,7 +993,7 @@ public function setCapacity($number) {
 	
 /*
 Change player name
-TODO: change name in guilds and houses
+you have to manually change in guilds anmd houses when otserv is online
 */
 public function setName($name) {
 
