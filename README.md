@@ -14,7 +14,7 @@ getAccount
 getPremDays
 getCharacters
 getSex
-getLookdir
+getLookType
 getExp
 getExpForLevel
 getExpForNextLevel

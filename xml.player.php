@@ -1,7 +1,7 @@
 <?php
 /*
 Open Tibia XML player class
-Version: 0.2.13
+Version: 0.3.13
 Author: Pawel 'Pavlus' Janisio
 License: MIT
 Github: https://github.com/PJanisio/opentibia-player-xml-class
@@ -32,6 +32,7 @@ public $xmlAccountFilePath = ''; //exact path for PREPARED account
 public $structurePlayer = '';
 public $structureAccount = '';
 public $vocationName = '';
+public $outfitUrl = '';
 //bools
 public $xmlPlayer = NULL; //handler for player
 public $xmlAccount = NULL; //handler for account
@@ -45,6 +46,7 @@ public $expPercNextLevel = 0;
 public $expLevel = 0;
 //arrays
 public $skills = array();
+public $look = array(); 
 public $characters = array(); //names of other players on the same account
 public $spawn = array();
 public $temple = array();
@@ -224,11 +226,18 @@ return intval($this->xmlPlayer['sex']);
 
 
 /*
-Get look direction
+Get looktype and look direction
 */
-public function getLookdir() {
+public function getLookType() {
 
-return intval($this->xmlPlayer['lookdir']);
+$this->look['lookdir'] = intval($this->xmlPlayer['lookdir']);
+$this->look['type'] = intval($this->xmlPlayer->look['type']); 
+$this->look['head'] = intval($this->xmlPlayer->look['head']); 
+$this->look['body'] = intval($this->xmlPlayer->look['body']); 
+$this->look['legs'] = intval($this->xmlPlayer->look['legs']); 
+$this->look['feet'] = intval($this->xmlPlayer->look['feet']); 
+
+return $this->look;
 
 }
 
@@ -696,7 +705,9 @@ public function getHouses($playerName) {
 
 }
 
-
+/*
+Get storage values
+*/
 
 public function getStorageValues() {
 
@@ -711,6 +722,10 @@ return $this->storage; //array
 
 }
 
+/*
+Get deaths
+*/
+
 
 public function getDeaths() {
     
@@ -723,7 +738,21 @@ public function getDeaths() {
 
 }
 
+/*
+Create an outfit url (ots.me)
+*/
 
+public function showOutfit() {
+
+$look = $this->getLookType();
+
+$this->outfitUrl = 'https://outfit-images.ots.me/772/animoutfit.php?id='.$look['type'].'&addons=1&head='.$look['head'].'&body='.$look['body'].'&legs='.$look['legs'].'&feet='.$look['feet'].'&mount=0&direction=3';
+
+return $this->outfitUrl;
+
+
+
+}
 
 
 

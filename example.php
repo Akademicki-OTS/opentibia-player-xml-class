@@ -48,8 +48,20 @@ $playerName = 'Pavlus'; // we will deal with this player :)
 
                 }
 
+            //show player outfit
+
+            $image = $player->showOutfit();
+
+         ?>
+
+         <img src="<?php echo $image; ?>"><br>
+
+         <?php
+
          //show structure of xml file in class way
         echo 'Struture of xml player file: <br>';
         
          $player->showStructurePlayer();
-?>
+
+         
+
