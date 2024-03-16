@@ -42,6 +42,7 @@ getMagicLevelPercent
 getHouses
 getStorageValues
 getDeaths
+showOutfit
 
 ```
 
