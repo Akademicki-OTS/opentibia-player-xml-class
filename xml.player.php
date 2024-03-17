@@ -1,7 +1,7 @@
 <?php
 /*
 Open Tibia XML player class
-Version: 0.3.13
+Version: 0.3.14
 Author: Pawel 'Pavlus' Janisio
 License: MIT
 Github: https://github.com/PJanisio/opentibia-player-xml-class
@@ -731,7 +731,7 @@ public function getDeaths() {
     
     
     foreach ($this->xmlPlayer->deaths->death as $id) {
-            $this->dead[] = $id;
+            $this->dead = $id;
         }
 
        return $this->dead; //array of objects
@@ -745,12 +745,8 @@ Create an outfit url (ots.me)
 public function showOutfit() {
 
 $look = $this->getLookType();
-
-$this->outfitUrl = 'https://outfit-images.ots.me/772/animoutfit.php?id='.$look['type'].'&addons=1&head='.$look['head'].'&body='.$look['body'].'&legs='.$look['legs'].'&feet='.$look['feet'].'&mount=0&direction=3';
-
+$this->outfitUrl = 'https://outfit-images.ots.me/772/animoutfit.php?id='.$look['type'].'&head='.$look['head'].'&body='.$look['body'].'&legs='.$look['legs'].'&feet='.$look['feet'].'&direction=3';
 return $this->outfitUrl;
-
-
 
 }
 
