@@ -8,6 +8,9 @@ PHP class for retriving and edition of XML player file for open tibia server wit
 
 ```php
 prepare
+calculateHealth
+calculateMana
+createPlayer
 showStructurePlayer
 showStructureAccount
 showLastModifiedPlayers

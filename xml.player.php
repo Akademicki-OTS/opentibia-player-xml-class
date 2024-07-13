@@ -122,6 +122,158 @@ class XmlPlayer {
     }
 
     /**
+     * Calculate health based on vocation and level
+     * 
+     * @param int $vocation
+     * @param int $level
+     * @return int
+     */
+    public function calculateHealth(int $vocation, int $level): int {
+        switch ($vocation) {
+            case 1: // Sorcerer
+            case 2: // Druid
+                return (($level - 1) * 5) + 150;
+            case 3: // Paladin
+                return (($level - 1) * 10) + 150;
+            case 4: // Knight
+                return (($level - 1) * 15) + 150;
+            default:
+                $this->throwError('Invalid vocation for health calculation.', 1);
+        }
+    }
+
+    /**
+     * Calculate mana based on vocation and level
+     * 
+     * @param int $vocation
+     * @param int $level
+     * @return int
+     */
+    public function calculateMana(int $vocation, int $level): int {
+        switch ($vocation) {
+            case 1: // Sorcerer
+            case 2: // Druid
+                return (($level - 1) * 30);
+            case 3: // Paladin
+                return (($level - 1) * 15);
+            case 4: // Knight
+                return (($level - 1) * 5);
+            default:
+                $this->throwError('Invalid vocation for mana calculation.', 1);
+        }
+    }
+
+    /**
+     * Creates a new player with given attributes and loads inventory from external XML file
+     * 
+     * @param string $playerName
+     * @param int $accountNumber
+     * @param int $vocation
+     * @param int $level
+     * @param int $maglevel
+     * @param int $fistLevel
+     * @param int $clubLevel
+     * @param int $swordLevel
+     * @param int $axeLevel
+     * @param int $distanceLevel
+     * @param int $shieldLevel
+     * @param int $fishLevel
+     * @param string $inventoryFilePath Path to the inventory XML file
+     * @param int $promoted
+     * @return bool
+     */
+    public function createPlayer(
+        string $playerName,
+        int $accountNumber,
+        int $vocation,
+        int $level,
+        int $maglevel,
+        int $fistLevel,
+        int $clubLevel,
+        int $swordLevel,
+        int $axeLevel,
+        int $distanceLevel,
+        int $shieldLevel,
+        int $fishLevel,
+        string $inventoryFilePath, // New parameter for the inventory file path
+        int $promoted = 1
+    ): bool {
+        if ($vocation < 1 || $vocation > 4) {
+            $this->throwError('Invalid vocation. Valid values are 1 to 4.', 1);
+        }
+    
+        $exp = $this->getExpForLevel($level, 5);
+        $health = $this->calculateHealth($vocation, $level);
+        $mana = $this->calculateMana($vocation, $level);
+        $manaSpent = $this->getRequiredMana($vocation, $maglevel);
+    
+        // Load inventory from external XML file
+        $inventoryXml = file_get_contents($inventoryFilePath);
+        if ($inventoryXml === false) {
+            $this->throwError('Failed to load inventory file.', 2);
+        }
+    
+        $playerTemplate = '<?xml version="1.0"?>
+    <player name="' . $playerName . '" account="' . $accountNumber . '" sex="1" lookdir="3" exp="' . $exp . '" voc="' . $vocation . '" level="' . $level . '" access="0" cap="300" bless="0" магевел="' . $maglevel . '" lastlogin="1720695462" promoted="' . $promoted . '" banned="0">
+        <spawn x="160" y="54" z="7"/>
+        <temple x="160" y="54" z="7"/>
+        <skull type="0" kills="0" ticks="0" absolve="0" pzlocked="0" infightticks="0"/>
+        <health now="' . $health . '" max="' . $health . '" food="0"/>
+        <mana now="' . $mana . '" max="' . $mana . '" spent="' . $manaSpent . '"/>
+        <ban banned="0" banstart="0" banend="0" comment="" reason="" action="" deleted="0" finalwarning="0" banrealtime=""/>
+        <look type="130" head="20" body="30" legs="40" feet="50"/>
+        <skills>
+            <skill skillid="0" level="' . $fistLevel . '" tries="0"/>
+            <skill skillid="1" level="' . $clubLevel . '" tries="0"/>
+            <skill skillid="2" level="' . $swordLevel . '" tries="0"/>
+            <skill skillid="3" level="' . $axeLevel . '" tries="0"/>
+            <skill skillid="4" level="' . $distanceLevel . '" tries="0"/>
+            <skill skillid="5" level="' . $shieldLevel . '" tries="0"/>
+            <skill skillid="6" level="' . $fishLevel . '" tries="0"/>
+        </skills>
+        <spells></spells>
+        <deaths></deaths>
+        <inventory>' . $inventoryXml . '</inventory>
+    </player>';
+    
+        // Save the player's data
+        $filePath = $this->playersDir . $playerName . '.xml';
+        if (!is_dir($this->playersDir)) {
+            $this->throwError('Players directory does not exist: ' . $this->playersDir, 1);
+        }
+    
+        $fileCreated = file_put_contents($filePath, $playerTemplate);
+        if ($fileCreated === false) {
+            return false;
+        }
+    
+        // Add the new character to the account file
+        $accountFilePath = $this->accountsDir . $accountNumber . '.xml';
+        if (!file_exists($accountFilePath)) {
+            $this->throwError('Account file does not exist: ' . $accountFilePath, 1);
+        }
+    
+        $xmlAccount = simplexml_load_file($accountFilePath);
+        if ($xmlAccount === false) {
+            $this->throwError('Failed to load account file: ' . $accountFilePath, 1);
+        }
+    
+        if (!isset($xmlAccount->characters)) {
+            $xmlAccount->addChild('characters');
+        }
+    
+        $newCharacter = $xmlAccount->characters->addChild('character');
+        $newCharacter->addAttribute('name', $playerName);
+    
+        $accountUpdated = $xmlAccount->asXML($accountFilePath);
+        if ($accountUpdated === false) {
+            $this->throwError('Failed to update account file: ' . $accountFilePath, 1);
+        }
+    
+        return true;
+    }
+
+    /**
      * Show XML structure for player file
      * 
      * @return void
@@ -236,7 +388,10 @@ class XmlPlayer {
      * @param int $specialDivider
      * @return int
      */
-    public function getExpForLevel(int $level, int $specialDivider = 1): int {
+    public function getExpForLevel( $level, int $specialDivider = 1): int {
+
+        $level = intval($level);
+
         $this->expLevel = ((((50 * $level / 3 - 100) * $level + 850 / 3) * $level - 200) / $specialDivider);
         return intval($this->expLevel);
     }
@@ -522,36 +677,35 @@ class XmlPlayer {
     /**
      * Get required mana level
      * 
-     * @param int|null $mlevel
+     * @param int $vocation
+     * @param int $mlevel
      * @return int
      */
-    public function getRequiredMana(?int $mlevel = null): int {
+    public function getRequiredMana(int $vocation, int $mlevel): int {
         // Use mana spent and formula
         $vocationMultiplier = [1, 1.1, 1.1, 1.4, 3];
 
-        if (!isset($mlevel)) {
-            $mlevel = $this->getMagicLevel();
-        }
+        $reqMana = intval((400 * pow($vocationMultiplier[$vocation], $mlevel - 1)));
 
-        $this->reqMana = intval((400 * pow($vocationMultiplier[$this->getVocation()], $mlevel - 1)));
-
-        if ($this->reqMana % 20 < 10) {
-            $this->reqMana = $this->reqMana - ($this->reqMana % 20);
+        if ($reqMana % 20 < 10) {
+            $reqMana = $reqMana - ($reqMana % 20);
         } else {
-            $this->reqMana = $this->reqMana - ($this->reqMana % 20) + 20;
+            $reqMana = $reqMana - ($reqMana % 20) + 20;
         }
 
-        return intval($this->reqMana);
+        return intval($reqMana);
     }
 
     /**
      * Get percentage magic level
      * 
+     * @param int $vocation
+     * @param int $mlevel
      * @return int
      */
-    public function getMagicLevelPercent(): int {
+    public function getMagicLevelPercent(int $vocation, int $mlevel): int {
         $this->getMana();
-        $this->magicLevelPercent = intval(100 * ($this->mana['spent'] / (1. * $this->getRequiredMana($this->getMagicLevel() + 1))));
+        $this->magicLevelPercent = intval(100 * ($this->mana['spent'] / (1.0 * $this->getRequiredMana($vocation, $mlevel + 1))));
 
         return intval($this->magicLevelPercent);
     }
@@ -734,11 +888,11 @@ class XmlPlayer {
      * @return bool
      */
     public function setBan(int $duration, string $reason, string $comment, int $finalwarning, int $deleted, ?bool $extend = null): bool {
-        $this->getBanStatus();
-        if ($this->ban['status'] == 1 && $extend === null) {
+        $banStatus = $this->getBanStatus();
+        if ($banStatus['status'] == 1 && $extend === null) {
             $this->throwError('Error: Player is already banned.', 1);
         } else {
-            if ($this->ban['finalwarning'] == 1) {
+            if ($banStatus['finalwarning'] == 1) {
                 $deleted = 1;
             }
 
@@ -747,7 +901,7 @@ class XmlPlayer {
             $this->xmlPlayer->ban['banned'] = 1; // 0;1
             $this->xmlPlayer->ban['banstart'] = time(); // Timestamp
             $this->xmlPlayer->ban['banend'] = time() + $durationHours; // Timestamp
-            $this->xmlPlayer->ban['banrealtime'] = date('Y-m-d H:i:s', $this->ban['end']);
+            $this->xmlPlayer->ban['banrealtime'] = date('Y-m-d H:i:s', $this->xmlPlayer->ban['banend']);
             $this->xmlPlayer->ban['comment'] = $comment;
             $this->xmlPlayer->ban['action'] = 'Account ban - XML class';
             $this->xmlPlayer->ban['reason'] = $reason;
@@ -768,8 +922,8 @@ class XmlPlayer {
      * @return bool
      */
     public function removeBan(?bool $removeFW = null, ?bool $removeDel = null): bool {
-        $this->getBanStatus();
-        if ($this->ban['status'] == 0) {
+        $banStatus = $this->getBanStatus();
+        if ($banStatus['status'] == 0) {
             $this->throwError('Error: Player is not banned. No action needed.', 1);
         } else {
             $this->xmlPlayer->ban['banned'] = 0; // 0;1
