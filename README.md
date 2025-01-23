@@ -52,6 +52,8 @@ getBoostStatus
 getKills
 getAge
 showOutfit
+getEmail
+getPoints
 
 ```
 
@@ -68,5 +70,7 @@ setAccess
 setPromotion
 setCapacity
 setName
+setEmail
+setPoints
 
 ```

@@ -1,7 +1,7 @@
 <?php
 /*
 Open Tibia XML player class
-Version: 0.6.14
+Version: 0.7.14
 Author: Pawel 'Pavlus' Janisio
 License: MIT
 Github: https://github.com/PJanisio/opentibia-player-xml-class
@@ -107,7 +107,7 @@ public function throwError($errorTxt, $showError) {
 }
 
 /*
-Check if its player (if false than monster)
+Check if its player (if false than other creature)
 */
 
 public function isPlayer($playerName) {
@@ -875,6 +875,22 @@ public function getGuild() {
     return $playerGuilds;
 }
 
+/*
+Get account points (zrzutkaPoints)
+*/
+
+public function getPoints() {
+    return intval($this->xmlAccount['zrzutkaPoints']);
+}
+
+/*
+Get account email
+*/
+
+public function getEmail() {
+    return strval($this->xmlAccount['email']);
+}
+
 
 
 /*
@@ -1175,6 +1191,36 @@ public function setName($name) {
 		}
 	
 	}
+
+
+
+/*
+Set new points value node: zrzutkaPoints
+*/
+
+public function setPoints($points) {
+    // Update the 'zrzutkaPoints' attribute
+    $this->xmlAccount['zrzutkaPoints'] = intval($points);
+
+    // Save changes to the account file
+    $saveStatus = $this->xmlAccount->asXML($this->xmlAccountFilePath);
+
+    return $saveStatus !== false;
+}
+
+/*
+Set new email value
+*/
+
+public function setEmail($email) {
+    // Update the 'email' attribute
+    $this->xmlAccount['email'] = $email;
+
+    // Save changes to the account file
+    $saveStatus = $this->xmlAccount->asXML($this->xmlAccountFilePath);
+
+    return $saveStatus !== false;
+}
 
 
 
