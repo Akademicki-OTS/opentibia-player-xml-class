@@ -46,6 +46,10 @@ getMagicLevelPercent
 getHouses
 getStorageValues
 getDeaths
+getGuild
+getBoostStatus
+getKills
+getAge
 showOutfit
 
 ```

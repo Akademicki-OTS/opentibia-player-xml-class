@@ -63,5 +63,12 @@ $playerName = 'Pavlus'; // we will deal with this player :)
         
          $player->showStructurePlayer();
 
+
+         //get guilds as an array
+
+         $g = $player->getGuild();
+
+
+
          
 

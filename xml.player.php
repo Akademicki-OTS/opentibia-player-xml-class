@@ -1,7 +1,7 @@
 <?php
 /*
 Open Tibia XML player class
-Version: 0.4.14
+Version: 0.5.14
 Author: Pawel 'Pavlus' Janisio
 License: MIT
 Github: https://github.com/PJanisio/opentibia-player-xml-class
@@ -18,6 +18,7 @@ private $realPath = '';
 private $housesPath = '';
 private $mapPath = '';
 private $monsterPath = '';
+private $guildPath = '';
 private $showError = 1; //shows backtrace of error message //def: 1
 //public
 //strings
@@ -61,6 +62,7 @@ public $dead = array();
 public $house = array();
 public $kills = array();
 public $boost = array();
+public $playerGuilds = array();
 
 /*
 Checks paths and define directories
@@ -86,6 +88,7 @@ $this->dataPath = $dataPath;
 			$this->housesPath = $this->realPath.'/houses/';
 			$this->mapPath = $this->realPath.'/world/';
 			$this->monsterPath = $this->realPath.'/monster/';
+			$this->guildPath = $this->realPath.'/guilds.xml';
 			}	
 
 }
@@ -728,8 +731,6 @@ return $this->storage; //array
 /*
 Get deaths
 */
-
-
 public function getDeaths() {
     
     
@@ -792,8 +793,74 @@ $this->outfitUrl = 'https://outfit-images.ots.me/772/animoutfit.php?id='.$look['
 
 return $this->outfitUrl;
 
+}
+
+/*
+Get guild name and member status
+*/
+
+public function getGuild() {
+    // If there's no guilds.xml file, we can throw an error or return an empty array.
+    if (!file_exists($this->guildPath)) {
+        $this->throwError('Guilds file not found!', 1);
+        return array();
+    }
+
+    // Load the guild XML
+    $guildsXml = simplexml_load_file($this->guildPath, 'SimpleXMLElement', LIBXML_PARSEHUGE);
+    if ($guildsXml === false) {
+        $this->throwError('Could not parse guilds.xml!', 1);
+        return array();
+    }
 
 
+    $playerName = strval($this->xmlPlayer['name']);
+
+    $playerGuilds = array();
+
+    foreach ($guildsXml->guild as $guildNode) {
+        foreach ($guildNode->member as $member) {
+            if (strval($member['name']) === $playerName) {
+
+                $statusInt = intval($member['status']);
+
+                // enum gstat_t {
+                //   GUILD_NONE,    // 0
+                //   GUILD_INVITED, // 1
+                //   GUILD_MEMBER,  // 2
+                //   GUILD_VICE,    // 3
+                //   GUILD_LEADER   // 4
+                // };
+                $statusName = 'GUILD_NONE';
+                switch ($statusInt) {
+                    case 0: 
+                        $statusName = 'GUILD_INVITED'; 
+                        break;
+                    case 1: 
+                        $statusName = 'GUILD_MEMBER'; 
+                        break;
+                    case 2: 
+                        $statusName = 'GUILD_VICE'; 
+                        break;
+                    case 4: 
+                        $statusName = 'GUILD_LEADER'; 
+                        break;
+                }
+
+                // Guild name
+                $guildName = strval($guildNode['name']);
+
+                // Add this guild membership info to our result array
+                $playerGuilds[] = array(
+                    'guildName' => $guildName,
+                    'guildStatus' => $statusName,
+                    'guildStatusId' => $statusInt 
+                );
+            }
+        }
+    }
+
+    return $playerGuilds;
 }
 
 
@@ -1064,7 +1131,7 @@ public function setCapacity($number) {
 	
 /*
 Change player name
-you have to manually change in guilds anmd houses when otserv is online
+you have to manually change in guilds and houses when otserv is online
 */
 public function setName($name) {
 
