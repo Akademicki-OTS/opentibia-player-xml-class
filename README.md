@@ -7,6 +7,7 @@ PHP class for retriving and edition of XML player file for open tibia server wit
 ### Get data
 
 ```php
+isPlayer
 prepare
 calculateHealth
 calculateMana
@@ -66,6 +67,6 @@ removeBan
 setAccess
 setPromotion
 setCapacity
-//setName
+setName
 
 ```

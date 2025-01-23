@@ -1,7 +1,7 @@
 <?php
 /*
 Open Tibia XML player class
-Version: 0.5.14
+Version: 0.6.14
 Author: Pawel 'Pavlus' Janisio
 License: MIT
 Github: https://github.com/PJanisio/opentibia-player-xml-class
@@ -104,6 +104,18 @@ public function throwError($errorTxt, $showError) {
 			throw new Exception($this->errorTxt);			
 		}
 
+}
+
+/*
+Check if its player (if false than monster)
+*/
+
+public function isPlayer($playerName) {
+    // Construct the full path to the player file
+    $filePath = $this->playersDir . $playerName . '.xml';
+    
+    // Check if the file exists
+    return file_exists($filePath);
 }
 
 /*
