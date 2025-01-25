@@ -1,7 +1,7 @@
 <?php
 /*
 Open Tibia XML player class
-Version: 0.7.14
+Version: 0.7.15
 Author: Pawel 'Pavlus' Janisio
 License: MIT
 Github: https://github.com/PJanisio/opentibia-player-xml-class
@@ -663,10 +663,8 @@ public function getHouses($playerName) {
 				//var_dump($open);
 				$found = strpos($open, $playerName);
 				
-				if($found > 0) {
-					//add housename to array
-					//we can use later to display houises name player owns
-					$houseFound[] = $house; 
+				if ($found !== false) {
+					$houseFound[] = $house;
 				}
 
 			}
