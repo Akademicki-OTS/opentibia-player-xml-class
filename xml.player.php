@@ -1,7 +1,7 @@
 <?php
 /*
 Open Tibia XML player class
-Version: 0.7.15
+Version: 0.7.16
 Author: Pawel 'Pavlus' Janisio
 License: MIT
 Github: https://github.com/PJanisio/opentibia-player-xml-class
@@ -654,72 +654,82 @@ public function getHouses($playerName) {
 	$houseFound = array(); //start array where player is stored
 
 	$houses = glob($this->housesPath.'*.xml');
+	
+	// Make sure we sanitize the player name for a proper match
+	$playerName = trim(strtolower($playerName)); // Convert to lowercase for case-insensitive comparison
 
-
-		foreach($houses as $house) {
-				//opens a file
-				$open = htmlentities(file_get_contents($house));
-				//check if player is found
-				//var_dump($open);
-				$found = strpos($open, $playerName);
-				
-				if ($found !== false) {
-					$houseFound[] = $house;
-				}
-
+	foreach($houses as $house) {
+		// Open the house XML
+		$xml = simplexml_load_file($house);
+		
+		// Check each ownership, subowner, doorowner, and guest tag for an exact match of the player's name
+		foreach($xml->owner as $owner) {
+			if(strtolower($owner['name']) == $playerName) {  // Use strtolower for case-insensitive comparison
+				$houseFound[] = $house;
 			}
-			//we need to define empty strings
-			$this->house['count'] = count($houseFound);
-			$this->house['owner'] = '';
-			$this->house['subowner'] = '';
-			$this->house['doorowner'] = '';
-			$this->house['guest'] = '';
+		}
 
-				foreach($houseFound as $playerHouse) {
-					//lets open each house and check access rights for player
-					$xml = simplexml_load_file($playerHouse);
-					//var_dump($xml);
-
-
-					//now we need to iterate of each ownership tag
-					foreach($xml->owner as $owner) {
-
-						if($owner['name'] == $playerName) {
-
-							$this->house['owner'] .= basename($playerHouse, '.xml').', ';
-						}
-					}
-
-					foreach($xml->subowner as $subowner) {
-							
-						if($subowner['name'] == $playerName) {
-
-							$this->house['subowner'] .= basename($playerHouse, '.xml').', ';
-						}
-					}
-					foreach($xml->doorowner as $doorowner) {
-
-						if($doorowner['name'] == $playerName) {
-
-							$this->house['doorowner'] .= basename($playerHouse, '.xml').', ';
-						}
-					}
-
-					foreach($xml->guest as $guest) {
-
-						if($guest['name'] == $playerName) {
-
-							$this->house['guest'] .= basename($playerHouse, '.xml').', ';
-						}
-					}
-
+		foreach($xml->subowner as $subowner) {
+			if(strtolower($subowner['name']) == $playerName) {
+				$houseFound[] = $house;
 			}
+		}
 
-			
-			 return $this->house; //return array of houses and rights
+		foreach($xml->doorowner as $doorowner) {
+			if(strtolower($doorowner['name']) == $playerName) {
+				$houseFound[] = $house;
+			}
+		}
 
+		foreach($xml->guest as $guest) {
+			if(strtolower($guest['name']) == $playerName) {
+				$houseFound[] = $house;
+			}
+		}
+	}
 
+	// Count and assign the house ownership/subownership/guest status
+	$this->house['count'] = count($houseFound);
+	$this->house['owner'] = '';
+	$this->house['subowner'] = '';
+	$this->house['doorowner'] = '';
+	$this->house['guest'] = '';
+
+	foreach($houseFound as $playerHouse) {
+		$xml = simplexml_load_file($playerHouse);
+
+		// Check ownership
+		foreach($xml->owner as $owner) {
+			if(strtolower($owner['name']) == $playerName) {
+				$this->house['owner'] .= basename($playerHouse, '.xml').', ';
+			}
+		}
+
+		// Check subownership
+		foreach($xml->subowner as $subowner) {
+			if(strtolower($subowner['name']) == $playerName) {
+				$this->house['subowner'] .= basename($playerHouse, '.xml').', ';
+			}
+		}
+
+		// Check door ownership
+		foreach($xml->doorowner as $doorowner) {
+			if(strtolower($doorowner['name']) == $playerName) {
+				$this->house['doorowner'] .= basename($playerHouse, '.xml').', ';
+			}
+		}
+
+		// Check guest status
+		foreach($xml->guest as $guest) {
+			if(strtolower($guest['name']) == $playerName) {
+				$this->house['guest'] .= basename($playerHouse, '.xml').', ';
+			}
+		}
+	}
+
+	return $this->house; // Return array of houses and rights
 }
+
 
 /*
 Get storage values
