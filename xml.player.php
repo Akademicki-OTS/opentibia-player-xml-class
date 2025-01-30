@@ -1,7 +1,7 @@
 <?php
 /*
 Open Tibia XML player class
-Version: 0.7.16
+Version: 0.8.16
 Author: Pawel 'Pavlus' Janisio
 License: MIT
 Github: https://github.com/PJanisio/opentibia-player-xml-class
@@ -317,8 +317,6 @@ public function getExpPercentNextLevel($specialDivider = 1) {
 	
 	}
 
-
-
 /*
 Get vocation
 enum playervoc_t {
@@ -398,23 +396,85 @@ return intval($this->xmlPlayer['level']);
 }
 
 
+
 /*
-Get skill levels
+Get skill tries
 */
+
+public function getReqSkillTries($skill, $level, $voc) {
+    // Skill bases for each skill type
+    $skillBases = [50, 50, 50, 50, 30, 100, 20];
+    
+    // Skill multipliers for each skill type and vocation
+    $skillMultipliers = [
+        [1.5, 1.5, 1.5, 1.2, 1.1], // Fist
+        [2.0, 2.0, 1.8, 1.2, 1.1], // Club
+        [2.0, 2.0, 1.8, 1.2, 1.1], // Sword
+        [2.0, 2.0, 1.8, 1.2, 1.1], // Axe
+        [2.0, 2.0, 1.8, 1.1, 1.4], // Distance
+        [1.5, 1.5, 1.5, 1.1, 1.1], // Shielding
+        [1.1, 1.1, 1.1, 1.1, 1.1]  // Fishing
+    ];
+    
+    // Calculate the required skill tries
+    $reqSkillTries = $skillBases[$skill] * pow($skillMultipliers[$skill][$voc], $level - 11);
+    
+    return intval($reqSkillTries);
+}
+
+/*
+Get skill percent for next level
+*/
+
+public function getSkillPercentForNextLevel($skillId) {
+    // Get the current skill level and tries from the XML
+    $currentSkill = $this->xmlPlayer->skills->skill[$skillId];
+    $currentLevel = intval($currentSkill['level']);
+    $currentTries = intval($currentSkill['tries']);
+    
+    // Get the vocation of the player
+    $voc = $this->getVocation();
+    
+    // Calculate the required skill tries for the next level
+    $reqTriesNextLevel = $this->getReqSkillTries($skillId, $currentLevel + 1, $voc);
+    
+    // Calculate the percentage of progress towards the next level
+    if ($reqTriesNextLevel == 0) {
+        return 100; // Already at max level or no progress needed
+    }
+    
+    $progress = ($currentTries / $reqTriesNextLevel) * 100;
+    
+    // Round the progress to the nearest whole number
+    $roundedProgress = round(max(0, min(100, $progress)));
+    
+    return intval($roundedProgress); // Ensure it's an integer
+}
+
+
+/*
+Get skill levels and skill percentage to next level
+*/
+
 public function getSkills() {
+    $this->skills['fist'] = intval($this->xmlPlayer->skills->skill[0]['level']);
+    $this->skills['club'] = intval($this->xmlPlayer->skills->skill[1]['level']);
+    $this->skills['sword'] = intval($this->xmlPlayer->skills->skill[2]['level']);
+    $this->skills['axe'] = intval($this->xmlPlayer->skills->skill[3]['level']);
+    $this->skills['distance'] = intval($this->xmlPlayer->skills->skill[4]['level']);
+    $this->skills['shield'] = intval($this->xmlPlayer->skills->skill[5]['level']);
 
+    // Add skill percentages for next level
+    $this->skills['fist_percent'] = $this->getSkillPercentForNextLevel(0);
+    $this->skills['club_percent'] = $this->getSkillPercentForNextLevel(1);
+    $this->skills['sword_percent'] = $this->getSkillPercentForNextLevel(2);
+    $this->skills['axe_percent'] = $this->getSkillPercentForNextLevel(3);
+    $this->skills['distance_percent'] = $this->getSkillPercentForNextLevel(4);
+    $this->skills['shield_percent'] = $this->getSkillPercentForNextLevel(5);
 
-	$this->skills['fist'] = intval($this->xmlPlayer->skills->skill[0]['level']);
-	$this->skills['club'] = intval($this->xmlPlayer->skills->skill[1]['level']);
-	$this->skills['sword'] = intval($this->xmlPlayer->skills->skill[2]['level']);
-	$this->skills['axe'] = intval($this->xmlPlayer->skills->skill[3]['level']);
-	$this->skills['distance'] = intval($this->xmlPlayer->skills->skill[4]['level']);
-	$this->skills['shield'] = intval($this->xmlPlayer->skills->skill[5]['level']);
+    return $this->skills; // Returns an associative array
+}
 
-
-	return $this->skills; //array
-	
-	}
 
 /*
 Get access

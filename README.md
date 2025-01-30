@@ -27,6 +27,8 @@ getExpPercentNextLevel
 getVocation
 getVocationName
 getLevel
+getReqSkillTries
+getSkillPercentForNextLevel
 getSkills
 getAccess
 getCapacity
