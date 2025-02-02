@@ -11,8 +11,6 @@ $data = 'testbench';
 $player = new xmlPlayer($data);
 
 
-
-
 $playerName = 'Pavlus'; // we will deal with this player :)
 
     //open both account file and player file, you can switch to other player anytime and class will aouto-close previous one

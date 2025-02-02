@@ -1,7 +1,7 @@
 <?php
 /*
 Open Tibia XML player class
-Version: 0.8.16
+Version: 1.0.0
 Author: Pawel 'Pavlus' Janisio
 License: MIT
 Github: https://github.com/PJanisio/opentibia-player-xml-class
@@ -9,224 +9,223 @@ Github: https://github.com/PJanisio/opentibia-player-xml-class
 
 
 
-class xmlPlayer {
+class xmlPlayer
+{
 
-//predefined variables
-//private
-private $dataPath = '';
-private $realPath = '';
-private $housesPath = '';
-private $mapPath = '';
-private $monsterPath = '';
-private $guildPath = '';
-private $showError = 1; //shows backtrace of error message //def: 1
-//public
-//strings
-public $errorTxt = ''; //placeholder for error text //def: ''
-public $playerName = '';
-public $skull = '';
-public $playersDir = '';
-public $accountsDir = '';
-public $lastElement = ''; //double check if will be needed
-public $xmlPlayerFilePath = ''; //exact path for PREPARED player
-public $xmlAccountFilePath = ''; //exact path for PREPARED account
-public $structurePlayer = '';
-public $structureAccount = '';
-public $vocationName = '';
-public $outfitUrl = '';
-//bools
-public $xmlPlayer = NULL; //handler for player
-public $xmlAccount = NULL; //handler for account
-//ints and floats
-public $account = 0;
-public $food = 0;
-public $reqMana = 0;
-public $magicLevelPercent = 0;
-public $expNextLevel = 0;
-public $expPercNextLevel = 0;
-public $expLevel = 0;
-public $age = 0;
-//arrays
-public $skills = array();
-public $look = array(); 
-public $characters = array(); //names of other players on the same account
-public $spawn = array();
-public $temple = array();
-public $frags = array();
-public $lastModified = array();
-public $health = array();
-public $mana = array();
-public $storage = array();
-public $ban = array(); //ban status,start,end,comment
-public $dead = array();
-public $house = array();
-public $kills = array();
-public $boost = array();
-public $playerGuilds = array();
+	//predefined variables
+	//private
+	private $dataPath = '';
+	private $realPath = '';
+	private $housesPath = '';
+	private $mapPath = '';
+	private $monsterPath = '';
+	private $guildPath = '';
+	private $showError = 1; //shows backtrace of error message //def: 1
+	//public
+	//strings
+	public $errorTxt = ''; //placeholder for error text //def: ''
+	public $playerName = '';
+	public $skull = '';
+	public $playersDir = '';
+	public $accountsDir = '';
+	public $lastElement = ''; //double check if will be needed
+	public $xmlPlayerFilePath = ''; //exact path for PREPARED player
+	public $xmlAccountFilePath = ''; //exact path for PREPARED account
+	public $structurePlayer = '';
+	public $structureAccount = '';
+	public $vocationName = '';
+	public $outfitUrl = '';
+	//bools
+	public $xmlPlayer = NULL; //handler for player
+	public $xmlAccount = NULL; //handler for account
+	//ints and floats
+	public $account = 0;
+	public $food = 0;
+	public $reqMana = 0;
+	public $magicLevelPercent = 0;
+	public $expNextLevel = 0;
+	public $expPercNextLevel = 0;
+	public $expLevel = 0;
+	public $age = 0;
+	//arrays
+	public $skills = array();
+	public $look = array();
+	public $characters = array(); //names of other players on the same account
+	public $spawn = array();
+	public $temple = array();
+	public $frags = array();
+	public $lastModified = array();
+	public $health = array();
+	public $mana = array();
+	public $storage = array();
+	public $ban = array(); //ban status,start,end,comment
+	public $dead = array();
+	public $house = array();
+	public $kills = array();
+	public $boost = array();
+	public $playerGuilds = array();
 
-/*
+	/*
 Checks paths and define directories
 */
-public function __construct($dataPath) {
+	public function __construct($dataPath)
+	{
 
-$this->dataPath = $dataPath;
-	$this->realPath = realpath($this->dataPath);
-	
+		$this->dataPath = $dataPath;
+		$this->realPath = realpath($this->dataPath);
+
 		//check if this is real path and directory
-		if($this->realPath == false OR !is_dir($this->realPath)) {
+		if ($this->realPath == false or !is_dir($this->realPath)) {
 			$this->throwError('Data path invalid!', 1);
 		}
-			
+
 		//check if there exists player anc accounts directory	
-		if(!is_dir($this->realPath.'/players') OR !is_dir($this->realPath.'/accounts') ) {
+		if (!is_dir($this->realPath . '/players') or !is_dir($this->realPath . '/accounts')) {
 			$this->throwError('Players/Accounts path is invalid!', 1);
+		} else {
+			$this->playersDir = $this->realPath . '/players/';
+			$this->accountsDir = $this->realPath . '/accounts/';
+			$this->housesPath = $this->realPath . '/houses/';
+			$this->mapPath = $this->realPath . '/world/';
+			$this->monsterPath = $this->realPath . '/monster/';
+			$this->guildPath = $this->realPath . '/guilds.xml';
 		}
-		else
-			{
-			$this->playersDir = $this->realPath.'/players/';
-			$this->accountsDir = $this->realPath.'/accounts/';
-			$this->housesPath = $this->realPath.'/houses/';
-			$this->mapPath = $this->realPath.'/world/';
-			$this->monsterPath = $this->realPath.'/monster/';
-			$this->guildPath = $this->realPath.'/guilds.xml';
-			}	
+	}
 
-}
-
-/*
+	/*
 Throwing error function
 */
-public function throwError($errorTxt, $showError) {
-			
-			
-			if($showError == 1) {
-			echo $errorTxt;
-			throw new Exception($this->errorTxt);			
+	public function throwError($errorTxt, $showError = 1)
+	{
+		$this->errorTxt = $errorTxt;
+		if ($showError == 1) {
+			throw new Exception($this->errorTxt);
 		}
+	}
 
-}
-
-/*
+	/*
 Check if its player (if false than other creature)
 */
 
-public function isPlayer($playerName) {
-    // Construct the full path to the player file
-    $filePath = $this->playersDir . $playerName . '.xml';
-    
-    // Check if the file exists
-    return file_exists($filePath);
-}
+	public function isPlayer($playerName)
+	{
+		// Construct the full path to the player file
+		$filePath = $this->playersDir . $playerName . '.xml';
 
-/*
+		// Check if the file exists
+		return file_exists($filePath);
+	}
+
+	/*
 Opens xml stream for player and account file
 */
-public function prepare($playerName) {
-//function to open xml stream
+
+	public function prepare($playerName)
+	{
+		//function to open xml stream
 
 		$playerName = trim(stripslashes($playerName));
-			$this->xmlPlayerFilePath = $this->playersDir.$playerName.'.xml';
-		
-			$this->xmlPlayer = simplexml_load_file($this->xmlPlayerFilePath, 'SimpleXMLElement', LIBXML_PARSEHUGE);		
-			
-			if($this->xmlPlayer === FALSE) //returns not boolean false what the heck
-				$this->throwError('Player do not exists!', 1);
-				else {
-				$this->xmlAccountFilePath = $this->accountsDir.$this->getAccount().'.xml';
-				$this->xmlAccount = simplexml_load_file($this->xmlAccountFilePath, 'SimpleXMLElement', LIBXML_PARSEHUGE);
-				
-			if ($this->xmlAccount === FALSE) 
+		$this->xmlPlayerFilePath = $this->playersDir . $playerName . '.xml';
+
+		$this->xmlPlayer = simplexml_load_file($this->xmlPlayerFilePath, 'SimpleXMLElement', LIBXML_PARSEHUGE);
+
+		if ($this->xmlPlayer === FALSE) //returns not boolean false what the heck
+			$this->throwError('Player do not exists!', 1);
+		else {
+			$this->xmlAccountFilePath = $this->accountsDir . $this->getAccount() . '.xml';
+			$this->xmlAccount = simplexml_load_file($this->xmlAccountFilePath, 'SimpleXMLElement', LIBXML_PARSEHUGE);
+
+			if ($this->xmlAccount === FALSE)
 				$this->throwError('Account file for player do not exists!', 1);
+		}
+		if ($this->xmlAccount and $this->xmlPlayer)
+			return TRUE;
 
-					}
-					if($this->xmlAccount AND $this->xmlPlayer)
-						return TRUE;
-						
-	//no need to close the file manually, will be auto-closed after reading content!
-}
+		//no need to close the file manually, will be auto-closed after reading content!
+	}
 
-/*
+	/*
 Get functions
 */
 
 
-/*
+	/*
 Show xml structure for player file
 */
-public function showStructurePlayer() {
-echo '<pre>', var_dump($this->xmlPlayer), '</pre>';
+	public function showStructurePlayer()
+	{
+		echo '<pre>', var_dump($this->xmlPlayer), '</pre>';
+	}
 
-}
-
-/*
+	/*
 Show xml structure for account file
 */
-public function showStructureAccount() {
-echo '<pre>', var_dump($this->xmlAccount), '</pre>';
+	public function showStructureAccount()
+	{
+		echo '<pre>', var_dump($this->xmlAccount), '</pre>';
+	}
 
-}
 
-
-/*
+	/*
 Show last modyfied player files (by save or by class action)
 */
-public function showLastModifiedPlayers($minutes, $dateFormat = NULL) {
+	public function showLastModifiedPlayers($minutes, $dateFormat = NULL)
+	{
 
 
-if(!isset($dateFormat))
-$dateFormat = 'Y-m-d H:i:s';
+		if (!isset($dateFormat))
+			$dateFormat = 'Y-m-d H:i:s';
 
-$files = scandir($this->playersDir);
-foreach($files as $file) {
-  $stat = stat($this->playersDir.$file);
-	
-	$lastmod = $stat['mtime'];
-		$now = time();
-	
-	if($now - $lastmod < $minutes*60) 
-	$this->lastModified[$file] = date($dateFormat, $lastmod);
+		$files = scandir($this->playersDir);
+		foreach ($files as $file) {
+			$stat = stat($this->playersDir . $file);
+
+			$lastmod = $stat['mtime'];
+			$now = time();
+
+			if ($now - $lastmod < $minutes * 60)
+				$this->lastModified[$file] = date($dateFormat, $lastmod);
 		}
-		
+
 		return $this->lastModified;
+	}
 
-}
 
-
-/*
+	/*
 Get account number/name
 */
-public function getAccount() {
+	public function getAccount()
+	{
 
-return strval($this->xmlPlayer['account']);
+		return strval($this->xmlPlayer['account']);
+	}
 
-}
 
-
-/*
+	/*
 Get premium days
 */
-public function getPremDays() {
+	public function getPremDays()
+	{
 
-return intval($this->xmlAccount['premDays']);
+		return intval($this->xmlAccount['premDays']);
+	}
 
-}
-
-/*
+	/*
 Get other characters on the same account
 */
-public function getCharacters() {
+	public function getCharacters()
+	{
 
-for($k =0; $k < count($this->xmlAccount->characters->character); $k++) {
-    $character = $this->xmlAccount->characters->character[$k]['name'];
-            array_push($this->characters, $character);
-            
-    }
-    
-       return $this->characters; //array of objects
+		for ($k = 0; $k < count($this->xmlAccount->characters->character); $k++) {
+			$character = $this->xmlAccount->characters->character[$k]['name'];
+			array_push($this->characters, $character);
+		}
 
-}
+		return $this->characters; //array of objects
 
-/*
+	}
+
+	/*
 Get sex
 enum playersex_t {
 	PLAYERSEX_FEMALE = 0,
@@ -236,88 +235,89 @@ enum playersex_t {
 	PLAYERSEX_NIMFA = 4, 
 };
 */
-public function getSex() {
+	public function getSex()
+	{
 
-return intval($this->xmlPlayer['sex']);
+		return intval($this->xmlPlayer['sex']);
+	}
 
-}
 
-
-/*
+	/*
 Get looktype and look direction
 */
-public function getLookType() {
+	public function getLookType()
+	{
 
-$this->look['lookdir'] = intval($this->xmlPlayer['lookdir']);
-$this->look['type'] = intval($this->xmlPlayer->look['type']); 
-$this->look['head'] = intval($this->xmlPlayer->look['head']); 
-$this->look['body'] = intval($this->xmlPlayer->look['body']); 
-$this->look['legs'] = intval($this->xmlPlayer->look['legs']); 
-$this->look['feet'] = intval($this->xmlPlayer->look['feet']); 
+		$this->look['lookdir'] = intval($this->xmlPlayer['lookdir']);
+		$this->look['type'] = intval($this->xmlPlayer->look['type']);
+		$this->look['head'] = intval($this->xmlPlayer->look['head']);
+		$this->look['body'] = intval($this->xmlPlayer->look['body']);
+		$this->look['legs'] = intval($this->xmlPlayer->look['legs']);
+		$this->look['feet'] = intval($this->xmlPlayer->look['feet']);
 
-return $this->look;
+		return $this->look;
+	}
 
-}
 
-
-/*
+	/*
 Get experience points
 */
-public function getExp() {
+	public function getExp()
+	{
 
-return intval($this->xmlPlayer['exp']);
+		return intval($this->xmlPlayer['exp']);
+	}
 
-}
 
-
-/*
+	/*
 Get experience for any level
 specialDivider works when custom formula is used to calculate experience
 */
 
-public function getExpForLevel($level, $specialDivider = 1) {
+	public function getExpForLevel($level, $specialDivider = 1)
+	{
 
-	$this->expLevel = $this->expLevel = ((((50*$level/3 - 100)*$level + 850/3)*$level - 200)/$specialDivider);
+		$this->expLevel = $this->expLevel = ((((50 * $level / 3 - 100) * $level + 850 / 3) * $level - 200) / $specialDivider);
 
-	return intval($this->expLevel);
-	
+		return intval($this->expLevel);
 	}
 
-/*
+	/*
 Get experience for player next level
 */
 
-public function getExpForNextLevel($specialDivider = 1) {
+	public function getExpForNextLevel($specialDivider = 1)
+	{
 
-	$currentExp = $this->getExp();
-	$nextLevel = $this->getLevel() +  1;
+		$currentExp = $this->getExp();
+		$nextLevel = $this->getLevel() +  1;
 
 		//get exp for next level
-	$this->expNextLevel = ((((50*$nextLevel/3 - 100)*$nextLevel + 850/3)*$nextLevel - 200)/$specialDivider) - $currentExp;
+		$this->expNextLevel = ((((50 * $nextLevel / 3 - 100) * $nextLevel + 850 / 3) * $nextLevel - 200) / $specialDivider) - $currentExp;
 
-	return intval($this->expNextLevel);
-	
+		return intval($this->expNextLevel);
 	}
 
 
 
-/*
+	/*
 Get percentage value for next level as float
 */
 
-public function getExpPercentNextLevel($specialDivider = 1) {
+	public function getExpPercentNextLevel($specialDivider = 1)
+	{
 
-	$currentLevelExp = $this->getExpForLevel($this->getLevel(), $specialDivider);
-	$nextLevelExp = $this->getExpForLevel($this->getLevel()+1, $specialDivider);
-	$expForNextLvl = $this->getExpForNextLevel($specialDivider);
+		$currentLevelExp = $this->getExpForLevel($this->getLevel(), $specialDivider);
+		$nextLevelExp = $this->getExpForLevel($this->getLevel() + 1, $specialDivider);
+		$expForNextLvl = $this->getExpForNextLevel($specialDivider);
 
-	$this->expPercNextLevel = round(($expForNextLvl/($nextLevelExp - $currentLevelExp)*100), 1);
-		
-	return floatval(abs($this->expPercNextLevel)); //return percent
-	
+		$this->expPercNextLevel = round(($expForNextLvl / ($nextLevelExp - $currentLevelExp) * 100), 1);
+
+		return floatval(abs($this->expPercNextLevel)); //return percent
+
 	}
 
-/*
+	/*
 Get vocation
 enum playervoc_t {
 	VOCATION_NONE = 0,
@@ -327,747 +327,754 @@ enum playervoc_t {
 	VOCATION_KNIGHT = 4
 };
 */
-public function getVocation() {
+	public function getVocation()
+	{
 
-return intval($this->xmlPlayer['voc']);
-
-}
-
-/*
-Get vocation name and check promotion
-*/
-public function getVocationName() {
-
-	$vocation = $this->getVocation();
-	$promotion = $this->getPromotion();
-
-
-	switch ([$vocation, $promotion]) {
-		case [0, 0]:
-			$this->vocationName = 'No vocation';
-		break;
-	
-		case [1, 0]:
-			$this->vocationName = 'Sorcerer';
-		break;
-
-		case [1, 1]:
-			$this->vocationName = 'Master Sorcerer';
-		break;
-
-		case [2, 0]:
-			$this->vocationName = 'Druid';
-		break;
-
-		case [2, 1]:
-			$this->vocationName = 'Elder Druid';
-		break;
-
-		case [3, 0]:
-			$this->vocationName = 'Paladin';
-		break;
-
-		case [3, 1]:
-			$this->vocationName = 'Royal Paladin';
-		break;
-
-		case [4, 0]:
-			$this->vocationName = 'Knight';
-		break;
-
-		case [4, 1]:
-			$this->vocationName = 'Elite Knight';
-		break;
-		
+		return intval($this->xmlPlayer['voc']);
 	}
 
-	return $this->vocationName;
+	/*
+Get vocation name and check promotion
+*/
+	public function getVocationName()
+	{
 
-}
+		$vocation = $this->getVocation();
+		$promotion = $this->getPromotion();
 
 
-/*
+		switch ([$vocation, $promotion]) {
+			case [0, 0]:
+				$this->vocationName = 'No vocation';
+				break;
+
+			case [1, 0]:
+				$this->vocationName = 'Sorcerer';
+				break;
+
+			case [1, 1]:
+				$this->vocationName = 'Master Sorcerer';
+				break;
+
+			case [2, 0]:
+				$this->vocationName = 'Druid';
+				break;
+
+			case [2, 1]:
+				$this->vocationName = 'Elder Druid';
+				break;
+
+			case [3, 0]:
+				$this->vocationName = 'Paladin';
+				break;
+
+			case [3, 1]:
+				$this->vocationName = 'Royal Paladin';
+				break;
+
+			case [4, 0]:
+				$this->vocationName = 'Knight';
+				break;
+
+			case [4, 1]:
+				$this->vocationName = 'Elite Knight';
+				break;
+		}
+
+		return $this->vocationName;
+	}
+
+
+	/*
 Get level
 */
-public function getLevel() {
+	public function getLevel()
+	{
 
-return intval($this->xmlPlayer['level']);
-
-}
-
+		return intval($this->xmlPlayer['level']);
+	}
 
 
-/*
+
+	/*
 Get skill tries
 */
 
-public function getReqSkillTries($skill, $level, $voc) {
-    // Skill bases for each skill type
-    $skillBases = [50, 50, 50, 50, 30, 100, 20];
-    
-    // Skill multipliers for each skill type and vocation
-    $skillMultipliers = [
-        [1.5, 1.5, 1.5, 1.2, 1.1], // Fist
-        [2.0, 2.0, 1.8, 1.2, 1.1], // Club
-        [2.0, 2.0, 1.8, 1.2, 1.1], // Sword
-        [2.0, 2.0, 1.8, 1.2, 1.1], // Axe
-        [2.0, 2.0, 1.8, 1.1, 1.4], // Distance
-        [1.5, 1.5, 1.5, 1.1, 1.1], // Shielding
-        [1.1, 1.1, 1.1, 1.1, 1.1]  // Fishing
-    ];
-    
-    // Calculate the required skill tries
-    $reqSkillTries = $skillBases[$skill] * pow($skillMultipliers[$skill][$voc], $level - 11);
-    
-    return intval($reqSkillTries);
-}
+	public function getReqSkillTries($skill, $level, $voc)
+	{
+		// Skill bases for each skill type
+		$skillBases = [50, 50, 50, 50, 30, 100, 20];
 
-/*
+		// Skill multipliers for each skill type and vocation
+		$skillMultipliers = [
+			[1.5, 1.5, 1.5, 1.2, 1.1], // Fist
+			[2.0, 2.0, 1.8, 1.2, 1.1], // Club
+			[2.0, 2.0, 1.8, 1.2, 1.1], // Sword
+			[2.0, 2.0, 1.8, 1.2, 1.1], // Axe
+			[2.0, 2.0, 1.8, 1.1, 1.4], // Distance
+			[1.5, 1.5, 1.5, 1.1, 1.1], // Shielding
+			[1.1, 1.1, 1.1, 1.1, 1.1]  // Fishing
+		];
+
+		// Calculate the required skill tries
+		$reqSkillTries = $skillBases[$skill] * pow($skillMultipliers[$skill][$voc], $level - 11);
+
+		return intval($reqSkillTries);
+	}
+
+	/*
 Get skill percent for next level
 */
 
-public function getSkillPercentForNextLevel($skillId) {
-    // Get the current skill level and tries from the XML
-    $currentSkill = $this->xmlPlayer->skills->skill[$skillId];
-    $currentLevel = intval($currentSkill['level']);
-    $currentTries = intval($currentSkill['tries']);
-    
-    // Get the vocation of the player
-    $voc = $this->getVocation();
-    
-    // Calculate the required skill tries for the next level
-    $reqTriesNextLevel = $this->getReqSkillTries($skillId, $currentLevel + 1, $voc);
-    
-    // Calculate the percentage of progress towards the next level
-    if ($reqTriesNextLevel == 0) {
-        return 100; // Already at max level or no progress needed
-    }
-    
-    $progress = ($currentTries / $reqTriesNextLevel) * 100;
-    
-    // Round the progress to the nearest whole number
-    $roundedProgress = round(max(0, min(100, $progress)));
-    
-    return intval($roundedProgress); // Ensure it's an integer
-}
+	public function getSkillPercentForNextLevel($skillId)
+	{
+		// Get the current skill level and tries from the XML
+		$currentSkill = $this->xmlPlayer->skills->skill[$skillId];
+		$currentLevel = intval($currentSkill['level']);
+		$currentTries = intval($currentSkill['tries']);
+
+		// Get the vocation of the player
+		$voc = $this->getVocation();
+
+		// Calculate the required skill tries for the next level
+		$reqTriesNextLevel = $this->getReqSkillTries($skillId, $currentLevel + 1, $voc);
+
+		// Calculate the percentage of progress towards the next level
+		if ($reqTriesNextLevel == 0) {
+			return 100; // Already at max level or no progress needed
+		}
+
+		$progress = ($currentTries / $reqTriesNextLevel) * 100;
+
+		// Round the progress to the nearest whole number
+		$roundedProgress = round(max(0, min(100, $progress)));
+
+		return intval($roundedProgress); // Ensure it's an integer
+	}
 
 
-/*
+	/*
 Get skill levels and skill percentage to next level
 */
 
-public function getSkills() {
-    $this->skills['fist'] = intval($this->xmlPlayer->skills->skill[0]['level']);
-    $this->skills['club'] = intval($this->xmlPlayer->skills->skill[1]['level']);
-    $this->skills['sword'] = intval($this->xmlPlayer->skills->skill[2]['level']);
-    $this->skills['axe'] = intval($this->xmlPlayer->skills->skill[3]['level']);
-    $this->skills['distance'] = intval($this->xmlPlayer->skills->skill[4]['level']);
-    $this->skills['shield'] = intval($this->xmlPlayer->skills->skill[5]['level']);
+	public function getSkills()
+	{
+		$this->skills['fist'] = intval($this->xmlPlayer->skills->skill[0]['level']);
+		$this->skills['club'] = intval($this->xmlPlayer->skills->skill[1]['level']);
+		$this->skills['sword'] = intval($this->xmlPlayer->skills->skill[2]['level']);
+		$this->skills['axe'] = intval($this->xmlPlayer->skills->skill[3]['level']);
+		$this->skills['distance'] = intval($this->xmlPlayer->skills->skill[4]['level']);
+		$this->skills['shield'] = intval($this->xmlPlayer->skills->skill[5]['level']);
 
-    // Add skill percentages for next level
-    $this->skills['fist_percent'] = $this->getSkillPercentForNextLevel(0);
-    $this->skills['club_percent'] = $this->getSkillPercentForNextLevel(1);
-    $this->skills['sword_percent'] = $this->getSkillPercentForNextLevel(2);
-    $this->skills['axe_percent'] = $this->getSkillPercentForNextLevel(3);
-    $this->skills['distance_percent'] = $this->getSkillPercentForNextLevel(4);
-    $this->skills['shield_percent'] = $this->getSkillPercentForNextLevel(5);
+		// Add skill percentages for next level
+		$this->skills['fist_percent'] = $this->getSkillPercentForNextLevel(0);
+		$this->skills['club_percent'] = $this->getSkillPercentForNextLevel(1);
+		$this->skills['sword_percent'] = $this->getSkillPercentForNextLevel(2);
+		$this->skills['axe_percent'] = $this->getSkillPercentForNextLevel(3);
+		$this->skills['distance_percent'] = $this->getSkillPercentForNextLevel(4);
+		$this->skills['shield_percent'] = $this->getSkillPercentForNextLevel(5);
 
-    return $this->skills; // Returns an associative array
-}
+		return $this->skills; // Returns an associative array
+	}
 
 
-/*
+	/*
 Get access
 */
-public function getAccess() {
+	public function getAccess()
+	{
 
-return intval($this->xmlPlayer['access']);
+		return intval($this->xmlPlayer['access']);
+	}
 
-}
 
-
-/*
+	/*
 Get capacity
 */
-public function getCapacity() {
+	public function getCapacity()
+	{
 
-return intval($this->xmlPlayer['cap']);
+		return intval($this->xmlPlayer['cap']);
+	}
 
-}
 
-
-/*
+	/*
 Get bless level
 *not standard
 */
-public function getBless() {
+	public function getBless()
+	{
 
-return intval($this->xmlPlayer['bless']);
+		return intval($this->xmlPlayer['bless']);
+	}
 
-}
-
-/*
+	/*
 Get magiclevel
 */
-public function getMagicLevel() {
+	public function getMagicLevel()
+	{
 
-return intval($this->xmlPlayer['maglevel']);
+		return intval($this->xmlPlayer['maglevel']);
+	}
 
-}
 
-
-/*
+	/*
 Get lastlogin
 Available formats at: http://php.net/manual/en/function.date.php
 F.e: Y-m-d H:i:s
 */
-public function getLastLogin($format = NULL) {
+	public function getLastLogin($format = NULL)
+	{
 
-$time = intval($this->xmlPlayer['lastlogin']);
+		$time = intval($this->xmlPlayer['lastlogin']);
 
-if($format != NULL)
-return date($format, $time);
-	else
-		return intval($time);
+		if ($format != NULL)
+			return date($format, $time);
+		else
+			return intval($time);
+	}
 
-}
-
-/*
+	/*
 Get promoted status
 */
-public function getPromotion() {
+	public function getPromotion()
+	{
 
-return intval($this->xmlPlayer['promoted']);
+		return intval($this->xmlPlayer['promoted']);
+	}
 
-}
 
-
-/*
+	/*
 Get ban status
 */
-public function getBanStatus() {
-    
-$this->ban['status'] = intval($this->xmlPlayer->ban['banned']); //0;1
-$this->ban['start'] = intval($this->xmlPlayer->ban['banstart']); //timestamp
-$this->ban['end'] = intval($this->xmlPlayer->ban['banend']); //timestamp
-$this->ban['comment'] = strval($this->xmlPlayer->ban['comment']); 
-$this->ban['action'] = strval($this->xmlPlayer->ban['action']); 
-$this->ban['reason'] = strval($this->xmlPlayer->ban['reason']); 
-$this->ban['banrealtime'] = strval($this->xmlPlayer->ban['banrealtime']); 
-$this->ban['deleted'] = intval($this->xmlPlayer->ban['deleted']); //0;1
-$this->ban['finalwarning'] = intval($this->xmlPlayer->ban['finalwarning']); //0;1
+	public function getBanStatus()
+	{
 
-return $this->ban;
-}
+		$this->ban['status'] = intval($this->xmlPlayer->ban['banned']); //0;1
+		$this->ban['start'] = intval($this->xmlPlayer->ban['banstart']); //timestamp
+		$this->ban['end'] = intval($this->xmlPlayer->ban['banend']); //timestamp
+		$this->ban['comment'] = strval($this->xmlPlayer->ban['comment']);
+		$this->ban['action'] = strval($this->xmlPlayer->ban['action']);
+		$this->ban['reason'] = strval($this->xmlPlayer->ban['reason']);
+		$this->ban['banrealtime'] = strval($this->xmlPlayer->ban['banrealtime']);
+		$this->ban['deleted'] = intval($this->xmlPlayer->ban['deleted']); //0;1
+		$this->ban['finalwarning'] = intval($this->xmlPlayer->ban['finalwarning']); //0;1
+
+		return $this->ban;
+	}
 
 
-/*
+	/*
 Get spawn position as an array
 */
-public function getSpawnCoordinates() {
+	public function getSpawnCoordinates()
+	{
 
-$this->spawn['x'] = intval($this->xmlPlayer->spawn['x']);
-$this->spawn['y'] = intval($this->xmlPlayer->spawn['y']);
-$this->spawn['z'] = intval($this->xmlPlayer->spawn['z']);
+		$this->spawn['x'] = intval($this->xmlPlayer->spawn['x']);
+		$this->spawn['y'] = intval($this->xmlPlayer->spawn['y']);
+		$this->spawn['z'] = intval($this->xmlPlayer->spawn['z']);
 
-return $this->spawn;
+		return $this->spawn;
+	}
 
-}
-
-/*
+	/*
 Get temple position as an array
 */
-public function getTempleCoordinates() {
+	public function getTempleCoordinates()
+	{
 
-$this->temple['x'] = intval($this->xmlPlayer->temple['x']);
-$this->temple['y'] = intval($this->xmlPlayer->temple['y']);
-$this->temple['z'] = intval($this->xmlPlayer->temple['z']);
+		$this->temple['x'] = intval($this->xmlPlayer->temple['x']);
+		$this->temple['y'] = intval($this->xmlPlayer->temple['y']);
+		$this->temple['z'] = intval($this->xmlPlayer->temple['z']);
 
-return $this->temple;
+		return $this->temple;
+	}
 
-}
-
-/*
+	/*
 Get skull type
 	SKULL_NONE = 0,
 	SKULL_YELLOW = 1,
 	SKULL_WHITE = 3,
 	SKULL_RED = 4
 */
-public function getSkull() {
+	public function getSkull()
+	{
 
-$this->skull = $this->xmlPlayer->skull['type'];
+		$this->skull = $this->xmlPlayer->skull['type'];
 
-switch ($this->skull) {
-	case 1:
-		return $this->skull = 'YELLOW_SKULL';
-	case 3:
-		return $this->skull = 'WHITE_SKULL';
-	case 4:
-		return $this->skull = 'RED_SKULL';
-	default:
-		return $this->skull = 'NO_SKULL';
-					}
+		switch ($this->skull) {
+			case 1:
+				return $this->skull = 'YELLOW_SKULL';
+			case 3:
+				return $this->skull = 'WHITE_SKULL';
+			case 4:
+				return $this->skull = 'RED_SKULL';
+			default:
+				return $this->skull = 'NO_SKULL';
+		}
+	}
 
-}
-
-/*
+	/*
 Get frags as an array
 */
-public function getFrags() {
+	public function getFrags()
+	{
 
-$this->frags['kills'] = intval($this->xmlPlayer->skull['kills']); //int
-$this->frags['ticks'] = intval($this->xmlPlayer->skull['ticks']);
-$this->frags['absolve'] = intval($this->xmlPlayer->skull['absolve']);
+		$this->frags['kills'] = intval($this->xmlPlayer->skull['kills']); //int
+		$this->frags['ticks'] = intval($this->xmlPlayer->skull['ticks']);
+		$this->frags['absolve'] = intval($this->xmlPlayer->skull['absolve']);
 
-return $this->frags; //array
+		return $this->frags; //array
 
-}
+	}
 
 
-/*
+	/*
 Get health
 now
 max
 */
-public function getHealth() {
+	public function getHealth()
+	{
 
-$this->health['now'] = intval($this->xmlPlayer->health['now']);
-$this->health['max'] = intval($this->xmlPlayer->health['max']);
+		$this->health['now'] = intval($this->xmlPlayer->health['now']);
+		$this->health['max'] = intval($this->xmlPlayer->health['max']);
 
-return $this->health; //array
+		return $this->health; //array
 
-}
+	}
 
 
-/*
+	/*
 Get food level
 food maximum level = 1200000 (?)
 food > 1000 - gaining health and mana
 */
-public function getFoodLevel() {
+	public function getFoodLevel()
+	{
 
-$this->food = intval($this->xmlPlayer->health['food'] );
+		$this->food = intval($this->xmlPlayer->health['food']);
 
-return $this->food;
+		return $this->food;
+	}
 
-}
 
-
-/*
+	/*
 Get mana information
 */
-public function getMana() {
+	public function getMana()
+	{
 
-$this->mana['now'] = intval($this->xmlPlayer->mana['now']);
-$this->mana['max'] = intval($this->xmlPlayer->mana['max']);
-$this->mana['spent'] = intval($this->xmlPlayer->mana['spent']);
+		$this->mana['now'] = intval($this->xmlPlayer->mana['now']);
+		$this->mana['max'] = intval($this->xmlPlayer->mana['max']);
+		$this->mana['spent'] = intval($this->xmlPlayer->mana['spent']);
 
-return $this->mana;
+		return $this->mana;
+	}
 
-}
-
-/*
+	/*
 Get required mana level
 cpp source -> unsigned int Player::getReqMana(int maglevel, playervoc_t voc)
 not tested yet :)
 */
-public function getRequiredMana($mlevel = NULL) {
+	public function getRequiredMana($mlevel = NULL)
+	{
 
-//use mana spent and formula
-$vocationMultiplayer = array(1, 1.1, 1.1, 1.4, 3);
+		//use mana spent and formula
+		$vocationMultiplayer = array(1, 1.1, 1.1, 1.4, 3);
 
-if(!isset($mlevel))
-	$mlevel = $this->getMagicLevel();
+		if (!isset($mlevel))
+			$mlevel = $this->getMagicLevel();
 
-$this->reqMana = intval(( 400 * pow($vocationMultiplayer[$this->getVocation()], $mlevel -1)));
+		$this->reqMana = intval((400 * pow($vocationMultiplayer[$this->getVocation()], $mlevel - 1)));
 
-if ($this->reqMana % 20 < 10) //CIP must have been bored when they invented this odd rounding
-    $this->reqMana = $this->reqMana - ($this->reqMana % 20);
-  else
-    $this->reqMana = $this->reqMana - ($this->reqMana % 20) + 20;
+		if ($this->reqMana % 20 < 10) //CIP must have been bored when they invented this odd rounding
+			$this->reqMana = $this->reqMana - ($this->reqMana % 20);
+		else
+			$this->reqMana = $this->reqMana - ($this->reqMana % 20) + 20;
 
-return intval($this->reqMana);
+		return intval($this->reqMana);
+	}
 
-}
-
-/*
+	/*
 Get percentage magic level
 cpp source -> void Player::sendStats()
 */
-public function getMagicLevelPercent() {
+	public function getMagicLevelPercent()
+	{
 
-$this->getMana();
-$this->magicLevelPercent = intval(100*($this->mana['spent']/(1.* $this->getRequiredMana($this->getMagicLevel() + 1) )));
+		$this->getMana();
+		$this->magicLevelPercent = intval(100 * ($this->mana['spent'] / (1. * $this->getRequiredMana($this->getMagicLevel() + 1))));
 
-return intval($this->magicLevelPercent);
+		return intval($this->magicLevelPercent);
+	}
 
-}
 
-
-/*
+	/*
 Get houses players own or is invited
 this method doesnt need to use prepare for the player file
 */
-public function getHouses($playerName) {
+	public function getHouses($playerName)
+	{
 
-	$houseFound = array(); //start array where player is stored
+		$houseFound = array(); //start array where player is stored
 
-	$houses = glob($this->housesPath.'*.xml');
-	
-	// Make sure we sanitize the player name for a proper match
-	$playerName = trim(strtolower($playerName)); // Convert to lowercase for case-insensitive comparison
+		$houses = glob($this->housesPath . '*.xml');
 
-	foreach($houses as $house) {
-		// Open the house XML
-		$xml = simplexml_load_file($house);
-		
-		// Check each ownership, subowner, doorowner, and guest tag for an exact match of the player's name
-		foreach($xml->owner as $owner) {
-			if(strtolower($owner['name']) == $playerName) {  // Use strtolower for case-insensitive comparison
-				$houseFound[] = $house;
+		// Make sure we sanitize the player name for a proper match
+		$playerName = trim(strtolower($playerName)); // Convert to lowercase for case-insensitive comparison
+
+		foreach ($houses as $house) {
+			// Open the house XML
+			$xml = simplexml_load_file($house);
+
+			// Check each ownership, subowner, doorowner, and guest tag for an exact match of the player's name
+			foreach ($xml->owner as $owner) {
+				if (strtolower($owner['name']) == $playerName) {  // Use strtolower for case-insensitive comparison
+					$houseFound[] = $house;
+				}
+			}
+
+			foreach ($xml->subowner as $subowner) {
+				if (strtolower($subowner['name']) == $playerName) {
+					$houseFound[] = $house;
+				}
+			}
+
+			foreach ($xml->doorowner as $doorowner) {
+				if (strtolower($doorowner['name']) == $playerName) {
+					$houseFound[] = $house;
+				}
+			}
+
+			foreach ($xml->guest as $guest) {
+				if (strtolower($guest['name']) == $playerName) {
+					$houseFound[] = $house;
+				}
 			}
 		}
 
-		foreach($xml->subowner as $subowner) {
-			if(strtolower($subowner['name']) == $playerName) {
-				$houseFound[] = $house;
+		// Count and assign the house ownership/subownership/guest status
+		$this->house['count'] = count($houseFound);
+		$this->house['owner'] = '';
+		$this->house['subowner'] = '';
+		$this->house['doorowner'] = '';
+		$this->house['guest'] = '';
+
+		foreach ($houseFound as $playerHouse) {
+			$xml = simplexml_load_file($playerHouse);
+
+			// Check ownership
+			foreach ($xml->owner as $owner) {
+				if (strtolower($owner['name']) == $playerName) {
+					$this->house['owner'] .= basename($playerHouse, '.xml') . ', ';
+				}
+			}
+
+			// Check subownership
+			foreach ($xml->subowner as $subowner) {
+				if (strtolower($subowner['name']) == $playerName) {
+					$this->house['subowner'] .= basename($playerHouse, '.xml') . ', ';
+				}
+			}
+
+			// Check door ownership
+			foreach ($xml->doorowner as $doorowner) {
+				if (strtolower($doorowner['name']) == $playerName) {
+					$this->house['doorowner'] .= basename($playerHouse, '.xml') . ', ';
+				}
+			}
+
+			// Check guest status
+			foreach ($xml->guest as $guest) {
+				if (strtolower($guest['name']) == $playerName) {
+					$this->house['guest'] .= basename($playerHouse, '.xml') . ', ';
+				}
 			}
 		}
 
-		foreach($xml->doorowner as $doorowner) {
-			if(strtolower($doorowner['name']) == $playerName) {
-				$houseFound[] = $house;
-			}
-		}
-
-		foreach($xml->guest as $guest) {
-			if(strtolower($guest['name']) == $playerName) {
-				$houseFound[] = $house;
-			}
-		}
+		return $this->house; // Return array of houses and rights
 	}
 
-	// Count and assign the house ownership/subownership/guest status
-	$this->house['count'] = count($houseFound);
-	$this->house['owner'] = '';
-	$this->house['subowner'] = '';
-	$this->house['doorowner'] = '';
-	$this->house['guest'] = '';
 
-	foreach($houseFound as $playerHouse) {
-		$xml = simplexml_load_file($playerHouse);
-
-		// Check ownership
-		foreach($xml->owner as $owner) {
-			if(strtolower($owner['name']) == $playerName) {
-				$this->house['owner'] .= basename($playerHouse, '.xml').', ';
-			}
-		}
-
-		// Check subownership
-		foreach($xml->subowner as $subowner) {
-			if(strtolower($subowner['name']) == $playerName) {
-				$this->house['subowner'] .= basename($playerHouse, '.xml').', ';
-			}
-		}
-
-		// Check door ownership
-		foreach($xml->doorowner as $doorowner) {
-			if(strtolower($doorowner['name']) == $playerName) {
-				$this->house['doorowner'] .= basename($playerHouse, '.xml').', ';
-			}
-		}
-
-		// Check guest status
-		foreach($xml->guest as $guest) {
-			if(strtolower($guest['name']) == $playerName) {
-				$this->house['guest'] .= basename($playerHouse, '.xml').', ';
-			}
-		}
-	}
-
-	return $this->house; // Return array of houses and rights
-}
-
-
-/*
+	/*
 Get storage values
 */
 
-public function getStorageValues() {
+	public function getStorageValues()
+	{
 
-foreach ($this->xmlPlayer->storage->data as $item) {
-	
-	$key = strval($item['key']);
-	$value = strval($item['value']);
-	$this->storage[$key] = $value;
-}
+		foreach ($this->xmlPlayer->storage->data as $item) {
 
-return $this->storage; //array
+			$key = strval($item['key']);
+			$value = strval($item['value']);
+			$this->storage[$key] = $value;
+		}
 
-}
+		return $this->storage; //array
 
-/*
+	}
+
+	/*
 Get deaths
 */
-public function getDeaths() {
-    
-    
-    foreach ($this->xmlPlayer->deaths->death as $id) {
-            $this->dead[] = $id;
-        }
-
-       return $this->dead; //array of objects
-
-}
+	public function getDeaths()
+	{
 
 
-/*
+		foreach ($this->xmlPlayer->deaths->death as $id) {
+			$this->dead[] = $id;
+		}
+
+		return $this->dead; //array of objects
+
+	}
+
+
+	/*
 Get player age (in seconds)
 */
-public function getAge() {
-    $this->age = intval($this->xmlPlayer['age']);
-    return $this->age;
-}
+	public function getAge()
+	{
+		$this->age = intval($this->xmlPlayer['age']);
+		return $this->age;
+	}
 
-/*
+	/*
 Get kills statistics from the <skull> node:
 totalKills, totalDeaths, nsKills, wsKills, ysKills, rsKills
 */
-public function getKills() {
-    $kills = array();
-    $kills['totalKills'] = isset($this->xmlPlayer->skull['totalKills']) ? intval($this->xmlPlayer->skull['totalKills']) : 0;
-    $kills['totalDeaths'] = isset($this->xmlPlayer->skull['totalDeaths']) ? intval($this->xmlPlayer->skull['totalDeaths']) : 0;
-    $kills['nsKills'] = isset($this->xmlPlayer->skull['nsKills']) ? intval($this->xmlPlayer->skull['nsKills']) : 0;
-    $kills['wsKills'] = isset($this->xmlPlayer->skull['wsKills']) ? intval($this->xmlPlayer->skull['wsKills']) : 0;
-    $kills['ysKills'] = isset($this->xmlPlayer->skull['ysKills']) ? intval($this->xmlPlayer->skull['ysKills']) : 0;
-    $kills['rsKills'] = isset($this->xmlPlayer->skull['rsKills']) ? intval($this->xmlPlayer->skull['rsKills']) : 0;
-    return $kills;
-}
+	public function getKills()
+	{
+		$kills = array();
+		$kills['totalKills'] = isset($this->xmlPlayer->skull['totalKills']) ? intval($this->xmlPlayer->skull['totalKills']) : 0;
+		$kills['totalDeaths'] = isset($this->xmlPlayer->skull['totalDeaths']) ? intval($this->xmlPlayer->skull['totalDeaths']) : 0;
+		$kills['nsKills'] = isset($this->xmlPlayer->skull['nsKills']) ? intval($this->xmlPlayer->skull['nsKills']) : 0;
+		$kills['wsKills'] = isset($this->xmlPlayer->skull['wsKills']) ? intval($this->xmlPlayer->skull['wsKills']) : 0;
+		$kills['ysKills'] = isset($this->xmlPlayer->skull['ysKills']) ? intval($this->xmlPlayer->skull['ysKills']) : 0;
+		$kills['rsKills'] = isset($this->xmlPlayer->skull['rsKills']) ? intval($this->xmlPlayer->skull['rsKills']) : 0;
+		return $kills;
+	}
 
-/*
+	/*
 Get boost status
 status, ticks, task, timestamp, reroll
 */
-public function getBoostStatus() {
-    $boost = array();
-    $boost['status'] = isset($this->xmlPlayer->boost['status']) ? intval($this->xmlPlayer->boost['status']) : 0;
-    $boost['ticks'] = isset($this->xmlPlayer->boost['ticks']) ? intval($this->xmlPlayer->boost['ticks']) : 0;
-    $boost['task'] = isset($this->xmlPlayer->boost['task']) ? intval($this->xmlPlayer->boost['task']) : 0;
-    $boost['timestamp'] = isset($this->xmlPlayer->boost['timestamp']) ? intval($this->xmlPlayer->boost['timestamp']) : 0;
-    $boost['reroll'] = isset($this->xmlPlayer->boost['reroll']) ? intval($this->xmlPlayer->boost['reroll']) : 0;
-    return $boost;
-}
+	public function getBoostStatus()
+	{
+		$boost = array();
+		$boost['status'] = isset($this->xmlPlayer->boost['status']) ? intval($this->xmlPlayer->boost['status']) : 0;
+		$boost['ticks'] = isset($this->xmlPlayer->boost['ticks']) ? intval($this->xmlPlayer->boost['ticks']) : 0;
+		$boost['task'] = isset($this->xmlPlayer->boost['task']) ? intval($this->xmlPlayer->boost['task']) : 0;
+		$boost['timestamp'] = isset($this->xmlPlayer->boost['timestamp']) ? intval($this->xmlPlayer->boost['timestamp']) : 0;
+		$boost['reroll'] = isset($this->xmlPlayer->boost['reroll']) ? intval($this->xmlPlayer->boost['reroll']) : 0;
+		return $boost;
+	}
 
 
-/*
+	/*
 Create an outfit url (ots.me)
 */
 
-public function showOutfit() {
+	public function showOutfit()
+	{
 
-$look = $this->getLookType();
+		$look = $this->getLookType();
 
-$this->outfitUrl = 'https://outfit-images.ots.me/772/animoutfit.php?id='.$look['type'].'&addons=1&head='.$look['head'].'&body='.$look['body'].'&legs='.$look['legs'].'&feet='.$look['feet'].'&mount=0&direction=3';
+		$this->outfitUrl = 'https://outfit-images.ots.me/772/animoutfit.php?id=' . $look['type'] . '&addons=1&head=' . $look['head'] . '&body=' . $look['body'] . '&legs=' . $look['legs'] . '&feet=' . $look['feet'] . '&mount=0&direction=3';
 
-return $this->outfitUrl;
+		return $this->outfitUrl;
+	}
 
-}
-
-/*
+	/*
 Get guild name and member status
 */
 
-public function getGuild() {
-    // If there's no guilds.xml file, we can throw an error or return an empty array.
-    if (!file_exists($this->guildPath)) {
-        $this->throwError('Guilds file not found!', 1);
-        return array();
-    }
+	public function getGuild()
+	{
+		// If there's no guilds.xml file, we can throw an error or return an empty array.
+		if (!file_exists($this->guildPath)) {
+			$this->throwError('Guilds file not found!', 1);
+			return array();
+		}
 
-    // Load the guild XML
-    $guildsXml = simplexml_load_file($this->guildPath, 'SimpleXMLElement', LIBXML_PARSEHUGE);
-    if ($guildsXml === false) {
-        $this->throwError('Could not parse guilds.xml!', 1);
-        return array();
-    }
+		// Load the guild XML
+		$guildsXml = simplexml_load_file($this->guildPath, 'SimpleXMLElement', LIBXML_PARSEHUGE);
+		if ($guildsXml === false) {
+			$this->throwError('Could not parse guilds.xml!', 1);
+			return array();
+		}
 
 
-    $playerName = strval($this->xmlPlayer['name']);
+		$playerName = strval($this->xmlPlayer['name']);
 
-    $playerGuilds = array();
+		$playerGuilds = array();
 
-    foreach ($guildsXml->guild as $guildNode) {
-        foreach ($guildNode->member as $member) {
-            if (strval($member['name']) === $playerName) {
+		foreach ($guildsXml->guild as $guildNode) {
+			foreach ($guildNode->member as $member) {
+				if (strval($member['name']) === $playerName) {
 
-                $statusInt = intval($member['status']);
+					$statusInt = intval($member['status']);
 
-                // enum gstat_t {
-                //   GUILD_NONE,    // 0
-                //   GUILD_INVITED, // 1
-                //   GUILD_MEMBER,  // 2
-                //   GUILD_VICE,    // 3
-                //   GUILD_LEADER   // 4
-                // };
-                $statusName = 'GUILD_NONE';
-                switch ($statusInt) {
-                    case 0: 
-                        $statusName = 'GUILD_INVITED'; 
-                        break;
-                    case 1: 
-                        $statusName = 'GUILD_MEMBER'; 
-                        break;
-                    case 2: 
-                        $statusName = 'GUILD_VICE'; 
-                        break;
-                    case 4: 
-                        $statusName = 'GUILD_LEADER'; 
-                        break;
-                }
+					// enum gstat_t {
+					//   GUILD_NONE,    // 0
+					//   GUILD_INVITED, // 1
+					//   GUILD_MEMBER,  // 2
+					//   GUILD_VICE,    // 3
+					//   GUILD_LEADER   // 4
+					// };
+					$statusName = 'GUILD_NONE';
+					switch ($statusInt) {
+						case 0:
+							$statusName = 'GUILD_INVITED';
+							break;
+						case 1:
+							$statusName = 'GUILD_MEMBER';
+							break;
+						case 2:
+							$statusName = 'GUILD_VICE';
+							break;
+						case 4:
+							$statusName = 'GUILD_LEADER';
+							break;
+					}
 
-                // Guild name
-                $guildName = strval($guildNode['name']);
+					// Guild name
+					$guildName = strval($guildNode['name']);
 
-                // Add this guild membership info to our result array
-                $playerGuilds[] = array(
-                    'guildName' => $guildName,
-                    'guildStatus' => $statusName,
-                    'guildStatusId' => $statusInt 
-                );
-            }
-        }
-    }
+					// Add this guild membership info to our result array
+					$playerGuilds[] = array(
+						'guildName' => $guildName,
+						'guildStatus' => $statusName,
+						'guildStatusId' => $statusInt
+					);
+				}
+			}
+		}
 
-    return $playerGuilds;
-}
+		return $playerGuilds;
+	}
 
-/*
+	/*
 Get account points (zrzutkaPoints)
 */
 
-public function getPoints() {
-    return intval($this->xmlAccount['zrzutkaPoints']);
-}
+	public function getPoints()
+	{
+		return intval($this->xmlAccount['zrzutkaPoints']);
+	}
 
-/*
+	/*
 Get account email
 */
 
-public function getEmail() {
-    return strval($this->xmlAccount['email']);
-}
+	public function getEmail()
+	{
+		return strval($this->xmlAccount['email']);
+	}
 
 
 
-/*
+	/*
 Set functions
 */
 
 
-/*
+	/*
 Set new password
 */
 
-public function setPassword($password) {
-    
-        $this->xmlAccount['pass'] = $password;
-        $makeChange = $this->xmlAccount->asXML($this->xmlAccountFilePath);
-        
-        if($makeChange) {
-            
-            return TRUE;
-        }
-            else {
-                return FALSE;
-            }
-            
-}
+	public function setPassword($password)
+	{
 
+		$this->xmlAccount['pass'] = $password;
+		$makeChange = $this->xmlAccount->asXML($this->xmlAccountFilePath);
 
-/*
-Set new password
-*/
+		if ($makeChange) {
 
-public function setPremDays($count) {
-    
-	$this->xmlAccount['premDays'] = $count;
-	$makeChange = $this->xmlAccount->asXML($this->xmlAccountFilePath);
-	
-	if($makeChange) {
-		
-		return TRUE;
-	}
-		else {
+			return TRUE;
+		} else {
 			return FALSE;
 		}
-		
-}
+	}
 
 
-/*
+	/*
+Set new password
+*/
+
+	public function setPremDays($count)
+	{
+
+		$this->xmlAccount['premDays'] = $count;
+		$makeChange = $this->xmlAccount->asXML($this->xmlAccountFilePath);
+
+		if ($makeChange) {
+
+			return TRUE;
+		} else {
+			return FALSE;
+		}
+	}
+
+
+	/*
 Set sex
 */
 
-public function setSex($number) {
+	public function setSex($number)
+	{
 
-	if($number >= 0 AND $number < 5) {
+		if ($number >= 0 and $number < 5) {
 
-		$this->xmlPlayer['sex'] = $number;
-		$makeChange = $this->xmlPlayer->asXML($this->xmlPlayerFilePath);
-
-	}
-	else {
+			$this->xmlPlayer['sex'] = $number;
+			$makeChange = $this->xmlPlayer->asXML($this->xmlPlayerFilePath);
+		} else {
 			$this->throwError('Error: Range of arguments allowed: 0-4', 1);
-	}
-    
-	if($makeChange) {
-		
-		return TRUE;
-	}
-		else {
+		}
+
+		if ($makeChange) {
+
+			return TRUE;
+		} else {
 			return FALSE;
 		}
-		
-}
+	}
 
 
-/*
+	/*
 Remove character from account and delete player file
 set second argument to TRUE if you want to remove account file altogether
 */
 
-public function removeCharacter($charName, $accountRemove = NULL) {
-    
-	foreach($this->xmlAccount->characters->character as $seg) {
-        
-		if($seg['name'] == $charName) {
-		    //remove child attribute from account file
-			$dom = dom_import_simplexml($seg);
-			$dom->parentNode->removeChild($dom);
-			$makeChange = $this->xmlAccount->asXML($this->xmlAccountFilePath);
-			//remove player file
-			$makeRemove = unlink($this->xmlPlayerFilePath);
-				if($accountRemove == TRUE) {
+	public function removeCharacter($charName, $accountRemove = NULL)
+	{
+
+		foreach ($this->xmlAccount->characters->character as $seg) {
+
+			if ($seg['name'] == $charName) {
+				//remove child attribute from account file
+				$dom = dom_import_simplexml($seg);
+				$dom->parentNode->removeChild($dom);
+				$makeChange = $this->xmlAccount->asXML($this->xmlAccountFilePath);
+				//remove player file
+				$makeRemove = unlink($this->xmlPlayerFilePath);
+				if ($accountRemove == TRUE) {
 					$makeRemoveAcc = unlink($this->xmlAccountFilePath);
 				}
-        	}
-			else {
+			} else {
 				$this->throwError('Error: Player doesn`t exists.', 1);
+			}
 		}
-    }
-    if(isset($makeChange) AND isset($makeRemove) AND isset($makeRemoveAcc)) {
-        
-        return TRUE;
-    }
-    else {
-        return FALSE;
-    }
-    
-}
+		if (isset($makeChange) and isset($makeRemove) and isset($makeRemoveAcc)) {
 
-/*
+			return TRUE;
+		} else {
+			return FALSE;
+		}
+	}
+
+	/*
 Ban player
 Args:
 duration: set in houres
@@ -1075,21 +1082,21 @@ reason: will be displayed on site
 */
 
 
-public function setBan($duration, $reason, $comment, $finalwarning, $deleted, $extend = NULL) {
+	public function setBan($duration, $reason, $comment, $finalwarning, $deleted, $extend = NULL)
+	{
 
-	$this->getBanStatus();
-	if($this->ban['status'] == 1 AND $extend == NULL) {
+		$this->getBanStatus();
+		if ($this->ban['status'] == 1 and $extend == NULL) {
 
-		$this->throwError('Error: Player is already banned.', 1);
-	}
-		else {
-				//check if player has already finalwarning if so, put deleted
-			if($this->ban['finalwarning'] == 1) {
+			$this->throwError('Error: Player is already banned.', 1);
+		} else {
+			//check if player has already finalwarning if so, put deleted
+			if ($this->ban['finalwarning'] == 1) {
 
 				$deleted = 1;
 			}
 
-			$durationHoures = $duration*3600;
+			$durationHoures = $duration * 3600;
 
 			$this->xmlPlayer->ban['banned'] = 1; //0;1
 			$this->xmlPlayer->ban['banstart'] = time(); //timestamp
@@ -1102,35 +1109,32 @@ public function setBan($duration, $reason, $comment, $finalwarning, $deleted, $e
 			$this->xmlPlayer->ban['finalwarning'] = $finalwarning; //0;1
 
 			$makeChange = $this->xmlPlayer->asXML($this->xmlPlayerFilePath);
-
 		}
-    
-		if($makeChange) {
-		
+
+		if ($makeChange) {
+
 			return TRUE;
+		} else {
+			return FALSE;
 		}
-			else {
-				return FALSE;
-			}
-	
-		}
+	}
 
 
-/*
+	/*
 Unban player
 Optional args:
 removeFW - removing final warning
 removeDel - removing perm ban
 */
 
-public function removeBan($removeFW = NULL, $removeDel = NULL) {
+	public function removeBan($removeFW = NULL, $removeDel = NULL)
+	{
 
-	$this->getBanStatus();
-	if($this->ban['status'] == 0) {
+		$this->getBanStatus();
+		if ($this->ban['status'] == 0) {
 
-		$this->throwError('Error: Player is not banned. Dont need any action', 1);
-	}
-		else {
+			$this->throwError('Error: Player is not banned. Dont need any action', 1);
+		} else {
 
 
 			$this->xmlPlayer->ban['banned'] = 0; //0;1
@@ -1142,163 +1146,157 @@ public function removeBan($removeFW = NULL, $removeDel = NULL) {
 			$this->xmlPlayer->ban['action'] = '';
 			$this->xmlPlayer->ban['reason'] = '';
 
-			if($removeFW == 1) {
+			if ($removeFW == 1) {
 				$this->xmlPlayer->ban['finalwarning'] = 0; //0;1
 			}
-			if($removeDel == 1 ) {
+			if ($removeDel == 1) {
 				$this->xmlPlayer->ban['deleted'] = 0; //0;1
 			}
 			$makeChange = $this->xmlPlayer->asXML($this->xmlPlayerFilePath);
-
 		}
-    
-		if($makeChange) {
-		
+
+		if ($makeChange) {
+
 			return TRUE;
+		} else {
+			return FALSE;
 		}
-			else {
-				return FALSE;
-			}
-	
-		}
+	}
 
 
 
 
-/*
+	/*
 Set access
 */
 
-public function setAccess($number) {
+	public function setAccess($number)
+	{
 
 		$this->xmlPlayer['accesss'] = intval($number);
 		$makeChange = $this->xmlPlayer->asXML($this->xmlPlayerFilePath);
 
-	if($makeChange) {
-		
-		return TRUE;
-	}
-		else {
+		if ($makeChange) {
+
+			return TRUE;
+		} else {
 			return FALSE;
 		}
-		
-}
+	}
 
 
 
-/*
+	/*
 Set promotion
 */
-public function setPromotion($number) {
+	public function setPromotion($number)
+	{
 
-	$this->xmlPlayer['promoted'] = intval($number);
+		$this->xmlPlayer['promoted'] = intval($number);
 		$makeChange = $this->xmlPlayer->asXML($this->xmlPlayerFilePath);
 
-	if($makeChange) {
-		
-		return TRUE;
-	}
-		else {
+		if ($makeChange) {
+
+			return TRUE;
+		} else {
 			return FALSE;
 		}
-	
 	}
 
 
-/*
+	/*
 Set capacity
 */
-public function setCapacity($number) {
+	public function setCapacity($number)
+	{
 
-	$this->xmlPlayer['cap'] = intval($number);
+		$this->xmlPlayer['cap'] = intval($number);
 		$makeChange = $this->xmlPlayer->asXML($this->xmlPlayerFilePath);
 
-	if($makeChange) {
-		
-		return TRUE;
-	}
-		else {
+		if ($makeChange) {
+
+			return TRUE;
+		} else {
 			return FALSE;
 		}
-	
 	}
 
 
-	
-/*
+
+	/*
 Change player name
 you have to manually change in guilds and houses when otserv is online
 */
-public function setName($name) {
+	public function setName($name)
+	{
 
 		//changing player file
-	$currentName = $this->xmlPlayer['name'];
+		$currentName = $this->xmlPlayer['name'];
 
-	$this->xmlPlayer['name'] = strval($name);
+		$this->xmlPlayer['name'] = strval($name);
 		$makeChange = $this->xmlPlayer->asXML($this->xmlPlayerFilePath);
 
-	$rename = rename($this->xmlPlayerFilePath, $this->playersDir.$name);
-	 //changing account file
+		$rename = rename($this->xmlPlayerFilePath, $this->playersDir . $name);
+		//changing account file
 
-	 foreach($this->xmlAccount->characters->character as $seg) {
-        
-		if($seg['name'] == $currentName) {
+		foreach ($this->xmlAccount->characters->character as $seg) {
 
-			$seg['name'] = trim($name);
-			$makeChangeAcc = $this->xmlAccount->asXML($this->xmlAccountFilePath);
+			if ($seg['name'] == $currentName) {
+
+				$seg['name'] = trim($name);
+				$makeChangeAcc = $this->xmlAccount->asXML($this->xmlAccountFilePath);
+			}
 		}
 
-	}
+		if ($makeChange and $makeChangeAcc) {
 
-	if($makeChange AND $makeChangeAcc) {
-		
-		return TRUE;
-	}
-		else {
+			return TRUE;
+		} else {
 			return FALSE;
 		}
-	
 	}
 
 
 
-/*
+	/*
 Set new points value node: zrzutkaPoints
 */
 
-public function setPoints($points) {
-    // Update the 'zrzutkaPoints' attribute
-    $this->xmlAccount['zrzutkaPoints'] = intval($points);
+	public function setPoints($points)
+	{
+		// Update the 'zrzutkaPoints' attribute
+		$this->xmlAccount['zrzutkaPoints'] = intval($points);
 
-    // Save changes to the account file
-    $saveStatus = $this->xmlAccount->asXML($this->xmlAccountFilePath);
+		// Save changes to the account file
+		$saveStatus = $this->xmlAccount->asXML($this->xmlAccountFilePath);
 
-    return $saveStatus !== false;
-}
+		return $saveStatus !== false;
+	}
 
-/*
+	/*
 Set new email value
 */
 
-public function setEmail($email) {
-    // Update the 'email' attribute
-    $this->xmlAccount['email'] = $email;
+	public function setEmail($email)
+	{
+		// Update the 'email' attribute
+		$this->xmlAccount['email'] = $email;
 
-    // Save changes to the account file
-    $saveStatus = $this->xmlAccount->asXML($this->xmlAccountFilePath);
+		// Save changes to the account file
+		$saveStatus = $this->xmlAccount->asXML($this->xmlAccountFilePath);
 
-    return $saveStatus !== false;
-}
-
-
-
+		return $saveStatus !== false;
+	}
 
 
-/*
+
+
+
+	/*
 This method can not be used as game engine stores houses information in memory and will overwrite saved data
 */
 
-/*
+	/*
 
 
 public function removePlayersHouses($playerName) {
@@ -1383,7 +1381,7 @@ public function removePlayersHouses($playerName) {
 */
 
 
-	
 
-//end class
+
+	//end class
 }
