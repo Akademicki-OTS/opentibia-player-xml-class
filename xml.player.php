@@ -1,7 +1,7 @@
 <?php
 /*
 Open Tibia XML player class
-Version: 1.0.0
+Version: 1.1.1
 Author: Pawel 'Pavlus' Janisio
 License: MIT
 Github: https://github.com/PJanisio/opentibia-player-xml-class
@@ -64,6 +64,7 @@ class xmlPlayer
 	public $kills = array();
 	public $boost = array();
 	public $playerGuilds = array();
+	public $slotsData = array();
 
 	/*
 Checks paths and define directories
@@ -844,32 +845,69 @@ Get player age (in seconds)
 Get kills statistics from the <skull> node:
 totalKills, totalDeaths, nsKills, wsKills, ysKills, rsKills
 */
-	public function getKills()
-	{
-		$kills = array();
-		$kills['totalKills'] = isset($this->xmlPlayer->skull['totalKills']) ? intval($this->xmlPlayer->skull['totalKills']) : 0;
-		$kills['totalDeaths'] = isset($this->xmlPlayer->skull['totalDeaths']) ? intval($this->xmlPlayer->skull['totalDeaths']) : 0;
-		$kills['nsKills'] = isset($this->xmlPlayer->skull['nsKills']) ? intval($this->xmlPlayer->skull['nsKills']) : 0;
-		$kills['wsKills'] = isset($this->xmlPlayer->skull['wsKills']) ? intval($this->xmlPlayer->skull['wsKills']) : 0;
-		$kills['ysKills'] = isset($this->xmlPlayer->skull['ysKills']) ? intval($this->xmlPlayer->skull['ysKills']) : 0;
-		$kills['rsKills'] = isset($this->xmlPlayer->skull['rsKills']) ? intval($this->xmlPlayer->skull['rsKills']) : 0;
-		return $kills;
-	}
+public function getKills()
+{
+    // Re-initialize $this->kills
+    $this->kills = [];
+
+    $this->kills['totalKills']   = isset($this->xmlPlayer->skull['totalKills']) 
+        ? intval($this->xmlPlayer->skull['totalKills']) 
+        : 0;
+
+    $this->kills['totalDeaths']  = isset($this->xmlPlayer->skull['totalDeaths']) 
+        ? intval($this->xmlPlayer->skull['totalDeaths']) 
+        : 0;
+
+    $this->kills['nsKills']      = isset($this->xmlPlayer->skull['nsKills']) 
+        ? intval($this->xmlPlayer->skull['nsKills']) 
+        : 0;
+
+    $this->kills['wsKills']      = isset($this->xmlPlayer->skull['wsKills']) 
+        ? intval($this->xmlPlayer->skull['wsKills']) 
+        : 0;
+
+    $this->kills['ysKills']      = isset($this->xmlPlayer->skull['ysKills']) 
+        ? intval($this->xmlPlayer->skull['ysKills']) 
+        : 0;
+
+    $this->kills['rsKills']      = isset($this->xmlPlayer->skull['rsKills']) 
+        ? intval($this->xmlPlayer->skull['rsKills']) 
+        : 0;
+
+    return $this->kills;
+}
 
 	/*
 Get boost status
 status, ticks, task, timestamp, reroll
 */
-	public function getBoostStatus()
-	{
-		$boost = array();
-		$boost['status'] = isset($this->xmlPlayer->boost['status']) ? intval($this->xmlPlayer->boost['status']) : 0;
-		$boost['ticks'] = isset($this->xmlPlayer->boost['ticks']) ? intval($this->xmlPlayer->boost['ticks']) : 0;
-		$boost['task'] = isset($this->xmlPlayer->boost['task']) ? intval($this->xmlPlayer->boost['task']) : 0;
-		$boost['timestamp'] = isset($this->xmlPlayer->boost['timestamp']) ? intval($this->xmlPlayer->boost['timestamp']) : 0;
-		$boost['reroll'] = isset($this->xmlPlayer->boost['reroll']) ? intval($this->xmlPlayer->boost['reroll']) : 0;
-		return $boost;
-	}
+public function getBoostStatus()
+{
+    // Re-initialize $this->boost
+    $this->boost = [];
+
+    $this->boost['status']    = isset($this->xmlPlayer->boost['status']) 
+        ? intval($this->xmlPlayer->boost['status']) 
+        : 0;
+
+    $this->boost['ticks']     = isset($this->xmlPlayer->boost['ticks']) 
+        ? intval($this->xmlPlayer->boost['ticks']) 
+        : 0;
+
+    $this->boost['task']      = isset($this->xmlPlayer->boost['task']) 
+        ? intval($this->xmlPlayer->boost['task']) 
+        : 0;
+
+    $this->boost['timestamp'] = isset($this->xmlPlayer->boost['timestamp']) 
+        ? intval($this->xmlPlayer->boost['timestamp']) 
+        : 0;
+
+    $this->boost['reroll']    = isset($this->xmlPlayer->boost['reroll']) 
+        ? intval($this->xmlPlayer->boost['reroll']) 
+        : 0;
+
+    return $this->boost;
+}
 
 
 	/*
@@ -973,10 +1011,55 @@ Get account email
 		return strval($this->xmlAccount['email']);
 	}
 
+		/*
+Get items id in player slots (eq)
+*/
 
 
-	/*
+	public function getEquipment()
+{
+    // Map your enum numeric values to their respective names:
+    $slotNames = [
+        0  => 'SLOT_WHEREEVER',
+        1  => 'SLOT_HEAD',
+        2  => 'SLOT_NECKLACE',
+        3  => 'SLOT_BACKPACK',
+        4  => 'SLOT_ARMOR',
+        5  => 'SLOT_RIGHT',
+        6  => 'SLOT_LEFT',
+        7  => 'SLOT_LEGS',
+        8  => 'SLOT_FEET',
+        9  => 'SLOT_RING',
+        10 => 'SLOT_AMMO',
+        11 => 'SLOT_DEPOT'
+    ];
+
+    $this->slotsData = []; 
+
+	if (!isset($this->xmlPlayer->inventory->slot)) {
+        return $this->slotsData;
+    }
+
+    foreach ($this->xmlPlayer->inventory->slot as $slot) {
+        $slotId = (int)$slot['slotid'];
+        $itemId = isset($slot->item) ? (int)$slot->item['id'] : 0;
+
+        $this->slotsData[$slotId] = [
+            'slotName' => isset($slotNames[$slotId]) ? $slotNames[$slotId] : 'UNKNOWN_SLOT',
+            'itemId'   => $itemId
+        ];
+    }
+
+    return $this->slotsData;
+}
+
+
+
+
+/*
+===========================================================	
 Set functions
+===========================================================	
 */
 
 
@@ -1173,7 +1256,7 @@ Set access
 	public function setAccess($number)
 	{
 
-		$this->xmlPlayer['accesss'] = intval($number);
+		$this->xmlPlayer['access'] = intval($number);
 		$makeChange = $this->xmlPlayer->asXML($this->xmlPlayerFilePath);
 
 		if ($makeChange) {
@@ -1236,7 +1319,10 @@ you have to manually change in guilds and houses when otserv is online
 		$this->xmlPlayer['name'] = strval($name);
 		$makeChange = $this->xmlPlayer->asXML($this->xmlPlayerFilePath);
 
-		$rename = rename($this->xmlPlayerFilePath, $this->playersDir . $name);
+		$rename = rename(
+			$this->xmlPlayerFilePath,
+			$this->playersDir . $name . '.xml'
+		);
 		//changing account file
 
 		foreach ($this->xmlAccount->characters->character as $seg) {

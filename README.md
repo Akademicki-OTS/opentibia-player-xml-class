@@ -56,6 +56,7 @@ getAge
 showOutfit
 getEmail
 getPoints
+getEquipment
 
 ```
 

@@ -66,6 +66,11 @@ $playerName = 'Pavlus'; // we will deal with this player :)
 
          $g = $player->getGuild();
 
+         //get equipment data
+
+         $equipment = $player->getEquipment();
+            print_r($equipment);
+
 
 
          
