@@ -1,7 +1,7 @@
 <?php
 /*
 Open Tibia XML player class
-Version: 1.1.1
+Version: 1.2.1
 Author: Pawel 'Pavlus' Janisio
 License: MIT
 Github: https://github.com/PJanisio/opentibia-player-xml-class
@@ -116,6 +116,33 @@ Check if its player (if false than other creature)
 		// Check if the file exists
 		return file_exists($filePath);
 	}
+
+
+/*
+ * Loads an external player XML file from a given directory.
+ * This method only loads the player file (player.xml) and skips account/VIP data.
+ */
+
+public function prepareExternalPlayer($playerName, $externalDir) {
+    // Ensure the directory path ends with a slash
+    $externalDir = rtrim($externalDir, '/') . '/';
+    // Build the file path for the player XML
+    $filePath = $externalDir . $playerName . '.xml';
+    
+    if (!file_exists($filePath)) {
+        $this->throwError("External player file not found: " . $filePath, 1);
+    }
+    
+    // Load the player XML file
+    $this->xmlPlayerFilePath = $filePath;
+    $this->xmlPlayer = simplexml_load_file($filePath, 'SimpleXMLElement', LIBXML_PARSEHUGE);
+    if ($this->xmlPlayer === FALSE) {
+        $this->throwError("Error loading external player file!", 1);
+    }
+    
+    // Return TRUE to indicate success
+    return TRUE;
+}
 
 	/*
 Opens xml stream for player and account file
