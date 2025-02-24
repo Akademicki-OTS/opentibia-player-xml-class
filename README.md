@@ -76,5 +76,6 @@ setCapacity
 setName
 setEmail
 setPoints
+removePlayersHouses
 
 ```
