@@ -1,7 +1,7 @@
 <?php
 /*
 Open Tibia XML player class
-Version: 1.2.2
+Version: 1.3.2
 Author: Pawel 'Pavlus' Janisio
 License: MIT
 Github: https://github.com/PJanisio/opentibia-player-xml-class
@@ -59,9 +59,9 @@ class xmlPlayer
 	public $dead = array();
 	public $house = array();
 	public $kills = array();
-	public $boost = array();
 	public $playerGuilds = array();
 	public $slotsData = array();
+	public $boostStatus = array();
 
 	/*
 		  Checks paths and define directories
@@ -769,20 +769,60 @@ class xmlPlayer
 	}
 
 	/*
-		  Get boost status
-		  */
-	public function getBoostStatus()
-	{
-		$this->boost = [];
-		if (isset($this->xmlPlayer->boost)) {
-			$this->boost['status'] = isset($this->xmlPlayer->boost['status']) ? intval($this->xmlPlayer->boost['status']) : 0;
-			$this->boost['ticks'] = isset($this->xmlPlayer->boost['ticks']) ? intval($this->xmlPlayer->boost['ticks']) : 0;
-			$this->boost['task'] = isset($this->xmlPlayer->boost['task']) ? intval($this->xmlPlayer->boost['task']) : 0;
-			$this->boost['timestamp'] = isset($this->xmlPlayer->boost['timestamp']) ? intval($this->xmlPlayer->boost['timestamp']) : 0;
-			$this->boost['reroll'] = isset($this->xmlPlayer->boost['reroll']) ? intval($this->xmlPlayer->boost['reroll']) : 0;
-		}
-		return $this->boost;
-	}
+  Get boost status
+  	*/
+
+public function getBoostStatus()
+{
+    // Initialize $this->boostStatus with default values
+    $this->boostStatus = [
+        'damage' => ['active' => false, 'timeleft' => '00:00:00'],
+        'resistance' => ['active' => false, 'timeleft' => '00:00:00'],
+        'luck' => ['active' => false, 'timeleft' => '00:00:00'],
+        'speed' => ['active' => false, 'timeleft' => '00:00:00'],
+    ];
+
+    // Check if dungeon_boost node exists
+    if (isset($this->xmlPlayer->dungeon_boost)) {
+        $db = $this->xmlPlayer->dungeon_boost;
+
+        // Helper to convert remaining seconds into HH:MM:SS format
+        $formatTime = function($seconds) {
+            if ($seconds < 0) {
+                $seconds = 0;
+            }
+            $h = floor($seconds / 3600);
+            $m = floor(($seconds % 3600) / 60);
+            $s = $seconds % 60;
+            return sprintf('%02d:%02d:%02d', $h, $m, $s);
+        };
+
+        // damage
+        $this->boostStatus['damage']['active'] = (intval($db['daily_dmg']) > 0);
+        $timeLeft = intval($db['daily_dmg_ticks']) - time();
+        $this->boostStatus['damage']['timeleft'] = $formatTime($timeLeft);
+
+        // resistance
+        $this->boostStatus['resistance']['active'] = (intval($db['daily_res']) > 0);
+        $timeLeft = intval($db['daily_res_ticks']) - time();
+        $this->boostStatus['resistance']['timeleft'] = $formatTime($timeLeft);
+
+        // luck
+        $this->boostStatus['luck']['active'] = (intval($db['daily_luck']) > 0);
+        $timeLeft = intval($db['daily_luck_ticks']) - time();
+        $this->boostStatus['luck']['timeleft'] = $formatTime($timeLeft);
+
+        // speed
+        $this->boostStatus['speed']['active'] = (intval($db['daily_speed']) > 0);
+        $timeLeft = intval($db['daily_speed_ticks']) - time();
+        $this->boostStatus['speed']['timeleft'] = $formatTime($timeLeft);
+    }
+
+    // Return the property so it can be used elsewhere
+    return $this->boostStatus;
+}
+
+
 
 	/*
 		  Create an outfit url (ots.me)
