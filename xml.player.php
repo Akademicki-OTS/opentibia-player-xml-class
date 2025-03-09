@@ -1,7 +1,7 @@
 <?php
 /*
 Open Tibia XML player class
-Version: 1.3.3
+Version: 1.3.4
 Author: Pawel 'Pavlus' Janisio
 License: MIT
 Github: https://github.com/PJanisio/opentibia-player-xml-class
@@ -89,12 +89,20 @@ class xmlPlayer
 		}
 	}
 
-	private function fixUnescapedAmpersands($xmlText)
-	{
-		// This regex replaces raw '&' that is not part of an existing entity
-		// with '&amp;'.
-		return preg_replace('/&(?![A-Za-z0-9#]+;)/', '&amp;', $xmlText);
-	}
+	/*
+		Function to sanitize special characters that can occur in player passwords
+		  */
+
+		  private function sanitizeXmlContent($xmlText)
+		  {
+			  // Convert any raw '&' into '&amp;', except for valid entities
+			  return preg_replace(
+				  '/&(?!amp;|lt;|gt;|quot;|apos;|#[0-9]+;|#[xX][0-9A-Fa-f]+;)/',
+				  '&amp;',
+				  $xmlText
+			  );
+		  }
+
 
 	/*
 		  Throwing error function
@@ -159,7 +167,7 @@ class xmlPlayer
 			  $playerContents = file_get_contents($this->xmlPlayerFilePath);
 		  
 			  // -- Fix any unescaped '&' (that aren't already '&amp;', etc.)
-			  $playerContents = $this->fixUnescapedAmpersands($playerContents);
+			  $playerContents = $this->sanitizeXmlContent($playerContents);
 		  
 			  $this->xmlPlayer = simplexml_load_string($playerContents, 'SimpleXMLElement', LIBXML_PARSEHUGE);
 			  if ($this->xmlPlayer === FALSE) {
@@ -172,7 +180,7 @@ class xmlPlayer
 				  $this->throwError('Account file not found!', 1);
 			  }
 			  $accountContents = file_get_contents($this->xmlAccountFilePath);
-			  $accountContents = $this->fixUnescapedAmpersands($accountContents);
+			  $accountContents = $this->sanitizeXmlContent($accountContents);
 		  
 			  $this->xmlAccount = simplexml_load_string($accountContents, 'SimpleXMLElement', LIBXML_PARSEHUGE);
 			  if ($this->xmlAccount === FALSE) {
@@ -654,86 +662,117 @@ class xmlPlayer
 		return intval($this->magicLevelPercent);
 	}
 
-	/*
-		  Get houses players own or are invited to
-		  */
-	public function getHouses($playerName)
-	{
-		$houseFound = array();
-		$houses = glob($this->housesPath . '*.xml');
-		$playerName = trim(strtolower($playerName));
+/*
+  Get houses players own or are invited to
+*/
+public function getHouses($playerName)
+{
+    // Make sure $playerName is a string
+    if (!is_string($playerName)) {
+        // Either throw an error or just treat it as ''
+        // $this->throwError('Player name must be a string!');
+        $playerName = '';
+    }
 
-		foreach ($houses as $house) {
-			$xml = simplexml_load_file($house);
-			if (isset($xml->owner)) {
-				foreach ($xml->owner as $owner) {
-					if (strtolower($owner['name']) == $playerName) {
-						$houseFound[] = $house;
-					}
-				}
-			}
-			if (isset($xml->subowner)) {
-				foreach ($xml->subowner as $subowner) {
-					if (strtolower($subowner['name']) == $playerName) {
-						$houseFound[] = $house;
-					}
-				}
-			}
-			if (isset($xml->doorowner)) {
-				foreach ($xml->doorowner as $doorowner) {
-					if (strtolower($doorowner['name']) == $playerName) {
-						$houseFound[] = $house;
-					}
-				}
-			}
-			if (isset($xml->guest)) {
-				foreach ($xml->guest as $guest) {
-					if (strtolower($guest['name']) == $playerName) {
-						$houseFound[] = $house;
-					}
-				}
-			}
-		}
+    // Trim + lowercase once
+    $playerName = strtolower(trim($playerName));
 
-		$this->house['count'] = count($houseFound);
-		$this->house['owner'] = '';
-		$this->house['subowner'] = '';
-		$this->house['doorowner'] = '';
-		$this->house['guest'] = '';
+    $houseFound = array();
+    $houses = glob($this->housesPath . '*.xml');
 
-		foreach ($houseFound as $playerHouse) {
-			$xml = simplexml_load_file($playerHouse);
-			if (isset($xml->owner)) {
-				foreach ($xml->owner as $owner) {
-					if (strtolower($owner['name']) == $playerName) {
-						$this->house['owner'] .= basename($playerHouse, '.xml') . ', ';
-					}
-				}
-			}
-			if (isset($xml->subowner)) {
-				foreach ($xml->subowner as $subowner) {
-					if (strtolower($subowner['name']) == $playerName) {
-						$this->house['subowner'] .= basename($playerHouse, '.xml') . ', ';
-					}
-				}
-			}
-			if (isset($xml->doorowner)) {
-				foreach ($xml->doorowner as $doorowner) {
-					if (strtolower($doorowner['name']) == $playerName) {
-						$this->house['doorowner'] .= basename($playerHouse, '.xml') . ', ';
-					}
-				}
-			}
-			if (isset($xml->guest)) {
-				foreach ($xml->guest as $guest) {
-					if (strtolower($guest['name']) == $playerName) {
-						$this->house['guest'] .= basename($playerHouse, '.xml') . ', ';
-					}
-				}
-			}
-		}
-		return $this->house;
-	}
+    // 1) Gather list of house files that contain our player
+    foreach ($houses as $house) {
+        $xml = simplexml_load_file($house);
+
+        if (isset($xml->owner)) {
+            foreach ($xml->owner as $owner) {
+                // Cast to string so we never pass NULL to strtolower()
+                $ownerName = strtolower((string)$owner['name']);
+                if ($ownerName === $playerName) {
+                    $houseFound[] = $house;
+                }
+            }
+        }
+
+        if (isset($xml->subowner)) {
+            foreach ($xml->subowner as $subowner) {
+                $subownerName = strtolower((string)$subowner['name']);
+                if ($subownerName === $playerName) {
+                    $houseFound[] = $house;
+                }
+            }
+        }
+
+        if (isset($xml->doorowner)) {
+            foreach ($xml->doorowner as $doorowner) {
+                $doorName = strtolower((string)$doorowner['name']);
+                if ($doorName === $playerName) {
+                    $houseFound[] = $house;
+                }
+            }
+        }
+
+        if (isset($xml->guest)) {
+            foreach ($xml->guest as $guest) {
+                $guestName = strtolower((string)$guest['name']);
+                if ($guestName === $playerName) {
+                    $houseFound[] = $house;
+                }
+            }
+        }
+    }
+
+    // 2) Initialize the array with counts
+    $this->house['count'] = count($houseFound);
+    $this->house['owner'] = '';
+    $this->house['subowner'] = '';
+    $this->house['doorowner'] = '';
+    $this->house['guest'] = '';
+
+    // 3) For each house found, build up the final info
+    foreach ($houseFound as $playerHouse) {
+        $xml = simplexml_load_file($playerHouse);
+
+        if (isset($xml->owner)) {
+            foreach ($xml->owner as $owner) {
+                $ownerName = strtolower((string)$owner['name']);
+                if ($ownerName === $playerName) {
+                    $this->house['owner'] .= basename($playerHouse, '.xml') . ', ';
+                }
+            }
+        }
+
+        if (isset($xml->subowner)) {
+            foreach ($xml->subowner as $subowner) {
+                $subownerName = strtolower((string)$subowner['name']);
+                if ($subownerName === $playerName) {
+                    $this->house['subowner'] .= basename($playerHouse, '.xml') . ', ';
+                }
+            }
+        }
+
+        if (isset($xml->doorowner)) {
+            foreach ($xml->doorowner as $doorowner) {
+                $doorName = strtolower((string)$doorowner['name']);
+                if ($doorName === $playerName) {
+                    $this->house['doorowner'] .= basename($playerHouse, '.xml') . ', ';
+                }
+            }
+        }
+
+        if (isset($xml->guest)) {
+            foreach ($xml->guest as $guest) {
+                $guestName = strtolower((string)$guest['name']);
+                if ($guestName === $playerName) {
+                    $this->house['guest'] .= basename($playerHouse, '.xml') . ', ';
+                }
+            }
+        }
+    }
+
+    return $this->house;
+}
+
 
 	/*
 		  Get storage values
