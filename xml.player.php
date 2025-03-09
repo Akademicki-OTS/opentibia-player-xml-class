@@ -1,7 +1,7 @@
 <?php
 /*
 Open Tibia XML player class
-Version: 1.3.2
+Version: 1.3.3
 Author: Pawel 'Pavlus' Janisio
 License: MIT
 Github: https://github.com/PJanisio/opentibia-player-xml-class
@@ -89,6 +89,13 @@ class xmlPlayer
 		}
 	}
 
+	private function fixUnescapedAmpersands($xmlText)
+	{
+		// This regex replaces raw '&' that is not part of an existing entity
+		// with '&amp;'.
+		return preg_replace('/&(?![A-Za-z0-9#]+;)/', '&amp;', $xmlText);
+	}
+
 	/*
 		  Throwing error function
 		  */
@@ -140,26 +147,42 @@ class xmlPlayer
 	/*
 		  Opens xml stream for player and account file
 		  */
-	public function prepare($playerName)
-	{
-		//function to open xml stream
-		$playerName = trim(stripslashes($playerName));
-		$this->xmlPlayerFilePath = $this->playersDir . $playerName . '.xml';
-
-		$this->xmlPlayer = simplexml_load_file($this->xmlPlayerFilePath, 'SimpleXMLElement', LIBXML_PARSEHUGE);
-
-		if ($this->xmlPlayer === FALSE) { //returns not boolean false what the heck
-			$this->throwError('Player does not exist!', 1);
-		} else {
-			$this->xmlAccountFilePath = $this->accountsDir . $this->getAccount() . '.xml';
-			$this->xmlAccount = simplexml_load_file($this->xmlAccountFilePath, 'SimpleXMLElement', LIBXML_PARSEHUGE);
-
-			if ($this->xmlAccount === FALSE)
-				$this->throwError('Account file for player does not exist!', 1);
-		}
-		if ($this->xmlAccount && $this->xmlPlayer)
-			return TRUE;
-	}
+		  public function prepare($playerName)
+		  {
+			  $playerName = trim(stripslashes($playerName));
+			  $this->xmlPlayerFilePath = $this->playersDir . $playerName . '.xml';
+		  
+			  // -- read the player file contents into a string
+			  if (!file_exists($this->xmlPlayerFilePath)) {
+				  $this->throwError('Player file not found!', 1);
+			  }
+			  $playerContents = file_get_contents($this->xmlPlayerFilePath);
+		  
+			  // -- Fix any unescaped '&' (that aren't already '&amp;', etc.)
+			  $playerContents = $this->fixUnescapedAmpersands($playerContents);
+		  
+			  $this->xmlPlayer = simplexml_load_string($playerContents, 'SimpleXMLElement', LIBXML_PARSEHUGE);
+			  if ($this->xmlPlayer === FALSE) {
+				  $this->throwError('Player does not exist or is invalid XML!', 1);
+			  }
+		  
+			  // -- do the same for account file
+			  $this->xmlAccountFilePath = $this->accountsDir . $this->getAccount() . '.xml';
+			  if (!file_exists($this->xmlAccountFilePath)) {
+				  $this->throwError('Account file not found!', 1);
+			  }
+			  $accountContents = file_get_contents($this->xmlAccountFilePath);
+			  $accountContents = $this->fixUnescapedAmpersands($accountContents);
+		  
+			  $this->xmlAccount = simplexml_load_string($accountContents, 'SimpleXMLElement', LIBXML_PARSEHUGE);
+			  if ($this->xmlAccount === FALSE) {
+				  $this->throwError('Account file for player is invalid XML!', 1);
+			  }
+		  
+			  return ($this->xmlAccount && $this->xmlPlayer);
+		  }
+		  
+		  
 
 	/*
 	  ===========================================================	
@@ -945,12 +968,14 @@ public function getBoostStatus()
 	/*
 	  Set new password
 	  */
-	public function setPassword($password)
-	{
-		$this->xmlAccount['pass'] = $password;
-		$makeChange = $this->xmlAccount->asXML($this->xmlAccountFilePath);
-		return $makeChange ? TRUE : FALSE;
-	}
+	  public function setPassword($password)
+	  {
+		  // Make sure we escape special XML characters
+		  $passwordEscaped = htmlspecialchars($password, ENT_QUOTES | ENT_XML1, 'UTF-8');
+		  $this->xmlAccount['pass'] = $passwordEscaped;
+		  $makeChange = $this->xmlAccount->asXML($this->xmlAccountFilePath);
+		  return $makeChange ? TRUE : FALSE;
+	  }
 
 	/*
 	  Set premium days value
