@@ -1,7 +1,7 @@
 <?php
 /*
 Open Tibia XML player class
-Version: 1.4.4
+Version: 1.4.5
 Author: Pawel 'Pavlus' Janisio
 License: MIT
 Github: https://github.com/PJanisio/opentibia-player-xml-class
@@ -1010,7 +1010,7 @@ public function getTaskStatus()
 
     // Define storage keys for task and completed tasks.
     $TASK_STORAGE_KEY = '7777';     // active task id; -1 means no active task.
-    $TASKS_DONE_STORAGE_KEY = '7778'; // counter for tasks completed (assumed)
+    $TASKS_DONE_STORAGE_KEY = '7778';
 
     // Define kill tracker mapping (as in your Lua script).
     $KILL_TRACKER_STORAGE = array(
@@ -1043,31 +1043,31 @@ public function getTaskStatus()
 
     // Define task monsters mapping.
     $TASK_MONSTERS = array(
-        1  => array("name" => "Dragon", "killsRequired" => 200),
-        2  => array("name" => "Hydra", "killsRequired" => 200),
-        3  => array("name" => "Goblin Scavenger", "killsRequired" => 200),
-        4  => array("name" => "Dragon Lord", "killsRequired" => 200),
-        5  => array("name" => "Demon", "killsRequired" => 200),
-        6  => array("name" => "Ancient Spider", "killsRequired" => 200),
-        7  => array("name" => "Behemoth", "killsRequired" => 200),
-        8  => array("name" => "Warlock", "killsRequired" => 200),
-        9  => array("name" => "Goblin Shaman", "killsRequired" => 200),
-        10 => array("name" => "Abyssal Maleficar", "killsRequired" => 200),
-        11 => array("name" => "Belfegor", "killsRequired" => 200),
-        12 => array("name" => "King Kong", "killsRequired" => 200),
-        13 => array("name" => "Tamed Dragon", "killsRequired" => 200),
-        14 => array("name" => "Frosty Elf", "killsRequired" => 200),
-        15 => array("name" => "Herman IV", "killsRequired" => 200),
-        16 => array("name" => "Dark Messenger", "killsRequired" => 200),
-        17 => array("name" => "Dragon King", "killsRequired" => 200),
-        18 => array("name" => "Hydrant", "killsRequired" => 200),
-        19 => array("name" => "Dwarf Warchief", "killsRequired" => 200),
-        20 => array("name" => "Morgaroth", "killsRequired" => 200),
-        21 => array("name" => "Dwarf Warrior", "killsRequired" => 200),
-        22 => array("name" => "Dwarf Bolter", "killsRequired" => 200),
-        23 => array("name" => "Hellish Succubus", "killsRequired" => 200),
-        24 => array("name" => "Undead Swordsman", "killsRequired" => 200),
-        25 => array("name" => "Don Juan DeMarco", "killsRequired" => 200)
+        1  => array("name" => "Dragon", "killsRequired" => 300),
+        2  => array("name" => "Hydra", "killsRequired" => 300),
+        3  => array("name" => "Goblin Scavenger", "killsRequired" => 300),
+        4  => array("name" => "Dragon Lord", "killsRequired" => 300),
+        5  => array("name" => "Demon", "killsRequired" => 300),
+        6  => array("name" => "Ancient Spider", "killsRequired" => 300),
+        7  => array("name" => "Behemoth", "killsRequired" => 300),
+        8  => array("name" => "Warlock", "killsRequired" => 300),
+        9  => array("name" => "Goblin Shaman", "killsRequired" => 300),
+        10 => array("name" => "Abyssal Maleficar", "killsRequired" => 300),
+        11 => array("name" => "Belfegor", "killsRequired" => 300),
+        12 => array("name" => "King Kong", "killsRequired" => 300),
+        13 => array("name" => "Tamed Dragon", "killsRequired" => 300),
+        14 => array("name" => "Frosty Elf", "killsRequired" => 300),
+        15 => array("name" => "Herman IV", "killsRequired" => 300),
+        16 => array("name" => "Dark Messenger", "killsRequired" => 300),
+        17 => array("name" => "Dragon King", "killsRequired" => 300),
+        18 => array("name" => "Hydrant", "killsRequired" => 300),
+        19 => array("name" => "Dwarf Warchief", "killsRequired" => 300),
+        20 => array("name" => "Morgaroth", "killsRequired" => 300),
+        21 => array("name" => "Dwarf Warrior", "killsRequired" => 300),
+        22 => array("name" => "Dwarf Bolter", "killsRequired" => 300),
+        23 => array("name" => "Hellish Succubus", "killsRequired" => 300),
+        24 => array("name" => "Undead Swordsman", "killsRequired" => 300),
+        25 => array("name" => "Don Juan DeMarco", "killsRequired" => 300)
     );
 
     // Retrieve the active task ID.
