@@ -58,6 +58,7 @@ showOutfit
 getEmail
 getPoints
 getEquipment
+getTaskStatus
 
 ```
 
