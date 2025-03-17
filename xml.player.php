@@ -1,7 +1,7 @@
 <?php
 /*
 Open Tibia XML player class
-Version: 1.4.5
+Version: 1.4.6
 Author: Pawel 'Pavlus' Janisio
 License: MIT
 Github: https://github.com/PJanisio/opentibia-player-xml-class
@@ -1003,110 +1003,117 @@ public function getBoostStatus()
  	Get task status for the player.
  		*/
 
-public function getTaskStatus()
-{
-    // Get player's storage values from the XML file.
-    $storage = $this->getStorageValues();
-
-    // Define storage keys for task and completed tasks.
-    $TASK_STORAGE_KEY = '7777';     // active task id; -1 means no active task.
-    $TASKS_DONE_STORAGE_KEY = '7778';
-
-    // Define kill tracker mapping (as in your Lua script).
-    $KILL_TRACKER_STORAGE = array(
-        1  => 55024, // Dragon
-        2  => 55022, // Hydra
-        3  => 55009, // Goblin Scavenger
-        4  => 55025, // Dragon Lord
-        5  => 55020, // Demon
-        6  => 55031, // Ancient Spider
-        7  => 55000, // Behemoth
-        8  => 55001, // Warlock
-        9  => 55021, // Goblin Shaman
-        10 => 55032, // Abyssal Maleficar
-        11 => 55002, // Belfegor
-        12 => 55033, // King Kong
-        13 => 55034, // Tamed Dragon
-        14 => 55035, // Frosty Elf
-        15 => 55026, // Herman IV
-        16 => 55003, // Dark Messenger
-        17 => 55004, // Dragon King
-        18 => 55006, // Hydrant
-        19 => 55005, // Dwarf Warchief
-        20 => 55007, // Morgaroth
-        21 => 55029, // Dwarf Warrior
-        22 => 55030, // Dwarf Bolter
-        23 => 55027, // Hellish Succubus
-        24 => 55028, // Undead Swordsman
-        25 => 55008  // Don Juan DeMarco
-    );
-
-    // Define task monsters mapping.
-    $TASK_MONSTERS = array(
-        1  => array("name" => "Dragon", "killsRequired" => 300),
-        2  => array("name" => "Hydra", "killsRequired" => 300),
-        3  => array("name" => "Goblin Scavenger", "killsRequired" => 300),
-        4  => array("name" => "Dragon Lord", "killsRequired" => 300),
-        5  => array("name" => "Demon", "killsRequired" => 300),
-        6  => array("name" => "Ancient Spider", "killsRequired" => 300),
-        7  => array("name" => "Behemoth", "killsRequired" => 300),
-        8  => array("name" => "Warlock", "killsRequired" => 300),
-        9  => array("name" => "Goblin Shaman", "killsRequired" => 300),
-        10 => array("name" => "Abyssal Maleficar", "killsRequired" => 300),
-        11 => array("name" => "Belfegor", "killsRequired" => 300),
-        12 => array("name" => "King Kong", "killsRequired" => 300),
-        13 => array("name" => "Tamed Dragon", "killsRequired" => 300),
-        14 => array("name" => "Frosty Elf", "killsRequired" => 300),
-        15 => array("name" => "Herman IV", "killsRequired" => 300),
-        16 => array("name" => "Dark Messenger", "killsRequired" => 300),
-        17 => array("name" => "Dragon King", "killsRequired" => 300),
-        18 => array("name" => "Hydrant", "killsRequired" => 300),
-        19 => array("name" => "Dwarf Warchief", "killsRequired" => 300),
-        20 => array("name" => "Morgaroth", "killsRequired" => 300),
-        21 => array("name" => "Dwarf Warrior", "killsRequired" => 300),
-        22 => array("name" => "Dwarf Bolter", "killsRequired" => 300),
-        23 => array("name" => "Hellish Succubus", "killsRequired" => 300),
-        24 => array("name" => "Undead Swordsman", "killsRequired" => 300),
-        25 => array("name" => "Don Juan DeMarco", "killsRequired" => 300)
-    );
-
-    // Retrieve the active task ID.
-    // If the storage value is not set, default to -1 (no active task).
-    $activeTask = isset($storage[$TASK_STORAGE_KEY]) ? (int)$storage[$TASK_STORAGE_KEY] : -1;
-
-    // Prepare the result array.
-    $result = array();
-
-    if ($activeTask == -1) {
-        $result['active'] = false;
-        $result['message'] = "No active task.";
-    } else {
-        $result['active'] = true;
-        $result['taskId'] = $activeTask;
-        // Look up monster data for the active task.
-        if (isset($TASK_MONSTERS[$activeTask])) {
-            $result['monsterName'] = $TASK_MONSTERS[$activeTask]['name'];
-            $requiredKills = $TASK_MONSTERS[$activeTask]['killsRequired'];
-            // Use the kill tracker storage key for this task.
-            $killTrackerKey = $KILL_TRACKER_STORAGE[$activeTask];
-            $currentKills = isset($storage[(string)$killTrackerKey]) ? (int)$storage[(string)$killTrackerKey] : 0;
-            $remainingKills = max(0, $requiredKills - $currentKills);
-            $result['killsRequired'] = $requiredKills;
-            $result['currentKills'] = $currentKills;
-            $result['remainingKills'] = $remainingKills;
-        } else {
-            // If the task ID is not found in our defined array.
-            $result['monsterName'] = "Unknown task";
-            $result['killsRequired'] = 0;
-            $result['currentKills'] = 0;
-            $result['remainingKills'] = 0;
-        }
-    }
-    // Get the number of tasks completed (if stored).
-    $result['tasksCompleted'] = isset($storage[$TASKS_DONE_STORAGE_KEY]) ? (int)$storage[$TASKS_DONE_STORAGE_KEY] : 0;
-
-    return $result;
-}
+		 public function getTaskStatus()
+		 {
+			 // Get player's storage values from the XML file.
+			 $storage = $this->getStorageValues();
+		 
+			 // Define storage keys for task and completed tasks.
+			 $TASK_STORAGE_KEY = '7777';     // active task id; -1 means no active task.
+			 $TASKS_DONE_STORAGE_KEY = '7778';
+		 
+			 // Updated kill tracker mapping (from your Lua script)
+			 $KILL_TRACKER_STORAGE = array(
+				 1  => 55037, // Spider
+				 2  => 55038, // Skeleton
+				 3  => 55036, // Cyclops
+				 4  => 55024, // Dragon
+				 5  => 55022, // Hydra
+				 6  => 55009, // Goblin Scavenger
+				 7  => 55025, // Dragon Lord
+				 8  => 55020, // Demon
+				 9  => 55031, // Ancient Spider
+				 10 => 55000, // Behemoth
+				 11 => 55001, // Warlock
+				 12 => 55021, // Goblin Shaman
+				 13 => 55032, // Abyssal Maleficar
+				 14 => 55002, // Belfegor
+				 15 => 55033, // King Kong
+				 16 => 55034, // Tamed Dragon
+				 17 => 55035, // Frosty Elf
+				 18 => 55026, // Herman IV
+				 19 => 55003, // Dark Messenger
+				 20 => 55004, // Dragon King
+				 21 => 55006, // Hydrant
+				 22 => 55005, // Dwarf Warchief
+				 23 => 55007, // Morgaroth
+				 24 => 55029, // Dwarf Warrior
+				 25 => 55030, // Dwarf Bolter
+				 26 => 55027, // Hellish Succubus
+				 27 => 55028, // Undead Swordsman
+				 28 => 55008  // Don Juan DeMarco
+			 );
+		 
+			 // Updated task monsters mapping.
+			 $TASK_MONSTERS = array(
+				 1  => array("name" => "Spider", "killsRequired" => 300),
+				 2  => array("name" => "Skeleton", "killsRequired" => 300),
+				 3  => array("name" => "Cyclops", "killsRequired" => 300),
+				 4  => array("name" => "Dragon", "killsRequired" => 300),
+				 5  => array("name" => "Hydra", "killsRequired" => 300),
+				 6  => array("name" => "Goblin Scavenger", "killsRequired" => 300),
+				 7  => array("name" => "Dragon Lord", "killsRequired" => 300),
+				 8  => array("name" => "Demon", "killsRequired" => 300),
+				 9  => array("name" => "Ancient Spider", "killsRequired" => 300),
+				 10 => array("name" => "Behemoth", "killsRequired" => 300),
+				 11 => array("name" => "Warlock", "killsRequired" => 300),
+				 12 => array("name" => "Goblin Shaman", "killsRequired" => 300),
+				 13 => array("name" => "Abyssal Maleficar", "killsRequired" => 300),
+				 14 => array("name" => "Belfegor", "killsRequired" => 300),
+				 15 => array("name" => "King Kong", "killsRequired" => 300),
+				 16 => array("name" => "Tamed Dragon", "killsRequired" => 300),
+				 17 => array("name" => "Frosty Elf", "killsRequired" => 300),
+				 18 => array("name" => "Herman IV", "killsRequired" => 300),
+				 19 => array("name" => "Dark Messenger", "killsRequired" => 300),
+				 20 => array("name" => "Dragon King", "killsRequired" => 300),
+				 21 => array("name" => "Hydrant", "killsRequired" => 300),
+				 22 => array("name" => "Dwarf Warchief", "killsRequired" => 300),
+				 23 => array("name" => "Morgaroth", "killsRequired" => 300),
+				 24 => array("name" => "Dwarf Warrior", "killsRequired" => 300),
+				 25 => array("name" => "Dwarf Bolter", "killsRequired" => 300),
+				 26 => array("name" => "Hellish Succubus", "killsRequired" => 300),
+				 27 => array("name" => "Undead Swordsman", "killsRequired" => 300),
+				 28 => array("name" => "Don Juan DeMarco", "killsRequired" => 300)
+			 );
+		 
+			 // Retrieve the active task ID.
+			 // If the storage value is not set, default to -1 (no active task).
+			 $activeTask = isset($storage[$TASK_STORAGE_KEY]) ? (int)$storage[$TASK_STORAGE_KEY] : -1;
+		 
+			 // Prepare the result array.
+			 $result = array();
+		 
+			 if ($activeTask == -1) {
+				 $result['active'] = false;
+				 $result['message'] = "No active task.";
+			 } else {
+				 $result['active'] = true;
+				 $result['taskId'] = $activeTask;
+				 // Look up monster data for the active task.
+				 if (isset($TASK_MONSTERS[$activeTask])) {
+					 $result['monsterName'] = $TASK_MONSTERS[$activeTask]['name'];
+					 $requiredKills = $TASK_MONSTERS[$activeTask]['killsRequired'];
+					 // Use the kill tracker storage key for this task.
+					 $killTrackerKey = $KILL_TRACKER_STORAGE[$activeTask];
+					 $currentKills = isset($storage[(string)$killTrackerKey]) ? (int)$storage[(string)$killTrackerKey] : 0;
+					 $remainingKills = max(0, $requiredKills - $currentKills);
+					 $result['killsRequired'] = $requiredKills;
+					 $result['currentKills'] = $currentKills;
+					 $result['remainingKills'] = $remainingKills;
+				 } else {
+					 // If the task ID is not found in our defined array.
+					 $result['monsterName'] = "Unknown task";
+					 $result['killsRequired'] = 0;
+					 $result['currentKills'] = 0;
+					 $result['remainingKills'] = 0;
+				 }
+			 }
+			 // Get the number of tasks completed (if stored).
+			 $result['tasksCompleted'] = isset($storage[$TASKS_DONE_STORAGE_KEY]) ? (int)$storage[$TASKS_DONE_STORAGE_KEY] : 0;
+		 
+			 return $result;
+		 }
+		 
 
 
 	/*
