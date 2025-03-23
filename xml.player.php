@@ -1,7 +1,7 @@
 <?php
 /*
 Open Tibia XML player class
-Version: 1.4.7
+Version: 1.5.7
 Author: Pawel 'Pavlus' Janisio
 License: MIT
 Github: https://github.com/PJanisio/opentibia-player-xml-class
@@ -17,6 +17,8 @@ class xmlPlayer
 	private $mapPath = '';
 	private $monsterPath = '';
 	private $guildPath = '';
+	private $actionsPath = '';
+	private $npcPath = '';
 	private $showError = 1; //shows backtrace of error message //def: 1
 	//public
 	//strings
@@ -86,6 +88,8 @@ class xmlPlayer
 			$this->mapPath = $this->realPath . '/world/';
 			$this->monsterPath = $this->realPath . '/monster/';
 			$this->guildPath = $this->realPath . '/guilds.xml';
+			$this->actionsPath = $this->realPath . '/actions/scripts/';
+			$this->npcPath = $this->realPath . '/npc/scripts/';
 		}
 	}
 
@@ -1117,6 +1121,33 @@ public function getBoostStatus()
 		 
 			 return $result;
 		 }
+
+		 /*
+ 			Get dungeon points and number of dungeons completed for player
+ 		*/
+
+		 public function getDungeonsInfo()
+		 {
+
+			 $storage = $this->getStorageValues();
+		 
+			 $ACTIVITY_PTS_STORAGE    = '7790'; // total points
+			 $DUNGEONS_DONE_STORAGE   = '7793'; // dungeons completed
+		 
+
+			 $points = isset($storage[$ACTIVITY_PTS_STORAGE]) 
+				 ? (int)$storage[$ACTIVITY_PTS_STORAGE]
+				 : 0;
+		 
+			 $completed = isset($storage[$DUNGEONS_DONE_STORAGE]) 
+				 ? (int)$storage[$DUNGEONS_DONE_STORAGE]
+				 : 0;
+		 
+			 return [
+				 'points'    => $points,
+				 'completed' => $completed
+			 ];
+		 }	 
 		 
 
 

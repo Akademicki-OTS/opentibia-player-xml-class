@@ -59,6 +59,7 @@ getEmail
 getPoints
 getEquipment
 getTaskStatus
+getDungeonsInfo
 
 ```
 
