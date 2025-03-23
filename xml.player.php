@@ -1,7 +1,7 @@
 <?php
 /*
 Open Tibia XML player class
-Version: 1.4.6
+Version: 1.4.7
 Author: Pawel 'Pavlus' Janisio
 License: MIT
 Github: https://github.com/PJanisio/opentibia-player-xml-class
@@ -779,6 +779,10 @@ public function getHouses($playerName)
 		  */
 	public function getStorageValues()
 	{
+
+		// Ensure we start empty each time
+		$this->storage = [];
+
 		if (isset($this->xmlPlayer->storage) && isset($this->xmlPlayer->storage->data)) {
 			foreach ($this->xmlPlayer->storage->data as $item) {
 				$key = isset($item['key']) ? strval($item['key']) : '';
