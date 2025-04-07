@@ -1,7 +1,7 @@
 <?php
 /*
 Open Tibia XML player class
-Version: 1.5.7
+Version: 1.6.7
 Author: Pawel 'Pavlus' Janisio
 License: MIT
 Github: https://github.com/PJanisio/opentibia-player-xml-class
@@ -19,6 +19,7 @@ class xmlPlayer
 	private $guildPath = '';
 	private $actionsPath = '';
 	private $npcPath = '';
+	private $config = []; //config.lua storage
 	private $showError = 1; //shows backtrace of error message //def: 1
 	//public
 	//strings
@@ -91,7 +92,92 @@ class xmlPlayer
 			$this->actionsPath = $this->realPath . '/actions/scripts/';
 			$this->npcPath = $this->realPath . '/npc/scripts/';
 		}
+
+		//parse the config.lua file
+        $parentPath = dirname($this->realPath);
+        $configFile = $parentPath . '/config.lua';
+        if (!file_exists($configFile)) {
+            $this->throwError('Config file not found at: ' . $configFile, 1);
+        }
+        $this->parseConfig($configFile);
+
+
 	}
+
+	/*
+      Parses the config.lua file and stores configuration values in $this->config.
+      This simple parser ignores lines starting with '--' (comments) and parses key-value pairs.
+    */
+    private function parseConfig($configFilePath)
+    {
+        $configData = file_get_contents($configFilePath);
+        if ($configData === false) {
+            $this->throwError("Unable to read config file at: " . $configFilePath, 1);
+        }
+        $lines = explode("\n", $configData);
+        $config = array();
+        foreach ($lines as $line) {
+            $line = trim($line);
+            // Skip empty lines and full-line comments
+            if ($line === '' || strpos($line, '--') === 0) {
+                continue;
+            }
+            // Remove inline comments (anything after --)
+            if (($commentPos = strpos($line, '--')) !== false) {
+                $line = trim(substr($line, 0, $commentPos));
+            }
+            // Match lines of the form: key = value
+            if (preg_match('/^(\w+)\s*=\s*(.+)$/', $line, $matches)) {
+                $key = $matches[1];
+                $value = trim($matches[2]);
+
+                // Check if the value is a quoted string
+                if (preg_match('/^"(.*)"$/', $value, $strMatches) || preg_match("/^'(.*)'$/", $value, $strMatches)) {
+                    $value = $strMatches[1];
+                }
+                // Check if the value is a Lua array (e.g. { "a", "b", "c" })
+                elseif (preg_match('/^{(.*)}$/', $value, $arrMatches)) {
+                    $arrayContent = $arrMatches[1];
+                    $items = explode(',', $arrayContent);
+                    $value = array();
+                    foreach ($items as $item) {
+                        $item = trim($item);
+                        if (preg_match('/^"(.*)"$/', $item, $itmMatches) || preg_match("/^'(.*)'$/", $item, $itmMatches)) {
+                            $value[] = $itmMatches[1];
+                        } else {
+                            $value[] = $item;
+                        }
+                    }
+                }
+                //convert numeric values if applicable
+                elseif (is_numeric($value)) {
+                    if (strpos($value, '.') !== false) {
+                        $value = floatval($value);
+                    } else {
+                        $value = intval($value);
+                    }
+                }
+                $config[$key] = $value;
+            }
+        }
+        $this->config = $config;
+    }
+
+    /*
+      Returns a configuration value by key. If the key is not found, it returns null.
+    */
+    public function getConfig($key)
+    {
+        return isset($this->config[$key]) ? $this->config[$key] : null;
+    }
+
+    /*
+      Returns all parsed configuration values as an associative array.
+    */
+    public function getAllConfig()
+    {
+        return $this->config;
+    }
 
 	/*
 		Function to sanitize special characters that can occur in player passwords

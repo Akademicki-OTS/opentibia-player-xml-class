@@ -10,6 +10,9 @@ PHP class for retriving and edition of XML player file for open tibia server wit
 isPlayer
 prepare
 prepareExternalPlayer
+parseConfig
+getConfig
+getAllConfig
 calculateHealth
 calculateMana
 createPlayer
